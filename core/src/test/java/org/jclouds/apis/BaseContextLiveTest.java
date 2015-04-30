@@ -16,12 +16,9 @@
  */
 package org.jclouds.apis;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.NoSuchElementException;
-import java.util.Properties;
-import java.util.logging.Logger;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.Module;
 import org.jclouds.Constants;
 import org.jclouds.Context;
 import org.jclouds.ContextBuilder;
@@ -33,9 +30,11 @@ import org.jclouds.util.Closeables2;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.Module;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class BaseContextLiveTest<C extends Context> {
    protected String prefix = System.getProperty("user.name");
@@ -123,7 +122,7 @@ public abstract class BaseContextLiveTest<C extends Context> {
             Logger.getAnonymousLogger()
                   .warning("provider ["
                         + provider
-                        + "] is not setup as META-INF/services/org.jclouds.apis.ApiMetadata or META-INF/services/org.jclouds.providers.ProviderMetadata");
+                        + "] is not setup as META-INF/services/org.jclouds.apis.ApiMetadata or META-INF/services/org.jclouds.providers.ProviderMetadata: ");
          }
 
       ProviderMetadata pm = createProviderMetadata();

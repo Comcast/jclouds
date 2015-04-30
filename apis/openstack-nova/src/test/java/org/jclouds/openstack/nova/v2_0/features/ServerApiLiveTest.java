@@ -107,7 +107,7 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
     * In apis/openstack-nova:
     * mvn -Plive clean install "-Dtest.openstack-nova.endpoint=http://localhost:5000/v2.0" "-Dtest.openstack-nova.identity=demo:demo" "-Dtest.openstack-nova.credential=devstack" "-Dtest=org.jclouds.openstack.nova.v2_0.features.ServerApiLiveTest#testCreateWithNetworkOptions"
     */
-   @Test(enabled = false)
+   @Test(enabled = true)
    public void testCreateWithNetworkOptions() {
       String serverId = null;
       for (String regionId : regions) {
@@ -132,7 +132,39 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
       }
    }
 
-   /**
+    /**
+     * Openstack specific - needs compute api v2.0 extensions enabled
+     * This can be tested on devstack:
+     * In apis/openstack-nova:
+     * mvn -Plive clean install "-Dtest.openstack-nova.endpoint=http://localhost:5000/v2.0" "-Dtest.openstack-nova.identity=demo:demo" "-Dtest.openstack-nova.credential=devstack" "-Dtest=org.jclouds.openstack.nova.v2_0.features.ServerApiLiveTest#testCreateWithSchedulerHints"
+     */
+    @Test(enabled = true)
+    public void testCreateWithSchedulerHints() {
+        String serverId = null;
+        for (String regionId : regions) {
+            ServerApi serverApi = api.getServerApi(regionId);
+            try {
+                CreateServerOptions options = CreateServerOptions.Builder.novaNetworks(
+                        // This network UUID must match an existing network.
+                        ImmutableSet.of(Network.builder().networkUuid("bc4cfa2b-2b27-4671-8e8f-73009623def0").fixedIp("192.168.55.56").build())
+                );
+                ServerCreated server = serverApi.create(hostName, imageId(regionId), "1", options);
+                serverId = server.getId();
+
+                awaitActive(serverApi).apply(server.getId());
+
+                Server serverCheck = serverApi.get(serverId);
+                assertEquals(serverCheck.getStatus(), ACTIVE);
+            } finally {
+                if (serverId != null) {
+                    serverApi.delete(serverId);
+                }
+            }
+        }
+    }
+
+
+    /**
     * This test creates a new server with a boot device from an image.
     * <p/>
     * This needs to be supported by the provider, and is usually not supported.

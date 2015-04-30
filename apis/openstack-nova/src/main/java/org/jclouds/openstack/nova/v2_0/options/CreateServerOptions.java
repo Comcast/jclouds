@@ -111,6 +111,7 @@ public class CreateServerOptions implements MapBinder {
    private String availabilityZone;
    private boolean configDrive;
    private Set<BlockDeviceMapping> blockDeviceMappings = ImmutableSet.of();
+   private SchedulerHints schedulerHints;
 
    @Override
    public boolean equals(Object object) {
@@ -126,7 +127,8 @@ public class CreateServerOptions implements MapBinder {
                && equal(networks, other.networks)
                && equal(availabilityZone, other.availabilityZone)
                && equal(configDrive, other.configDrive)
-               && equal(blockDeviceMappings, other.blockDeviceMappings);
+               && equal(blockDeviceMappings, other.blockDeviceMappings)
+               && equal(schedulerHints, other.schedulerHints);
       } else {
          return false;
       }
@@ -135,7 +137,7 @@ public class CreateServerOptions implements MapBinder {
    @Override
    public int hashCode() {
       return Objects.hashCode(keyName, adminPass, securityGroupNames, metadata, personality, networks, availabilityZone,
-            configDrive, blockDeviceMappings);
+            configDrive, blockDeviceMappings, schedulerHints);
    }
 
    protected ToStringHelper string() {
@@ -158,6 +160,9 @@ public class CreateServerOptions implements MapBinder {
       toString.add("configDrive", configDrive);
       if (!blockDeviceMappings.isEmpty())
          toString.add("blockDeviceMappings", blockDeviceMappings);
+      if(schedulerHints != null) {
+        toString.add("schedulerHints", schedulerHints);
+      }
       return toString;
    }
 
@@ -248,7 +253,14 @@ public class CreateServerOptions implements MapBinder {
          server.blockDeviceMappings = blockDeviceMappings;
       }
 
-      return bindToRequest(request, ImmutableMap.of("server", server));
+      if(serverGroup != null) {
+        SchedulerHints schedulerHints = SchedulerHints.Builder().serverGroup(serverGroup);
+        return bindToRequest(request, ImmutableMap.of("server", server, "os: scheduler_hints", schedulerHints));
+      }
+      else {
+        return bindToRequest(request, ImmutableMap.of("server", server));
+      }
+
    }
 
    private static class NamedThingy extends ForwardingObject {
@@ -576,6 +588,13 @@ public class CreateServerOptions implements MapBinder {
        */
       public static CreateServerOptions blockDeviceMappings(Set<BlockDeviceMapping> blockDeviceMappings) {
          return new CreateServerOptions().blockDeviceMappings(blockDeviceMappings);
+      }
+
+      /**
+       * @see CreateServerOptions#schedulerHints(SchedulerHints)
+       */
+      public static CreateServerOptions schedulerHints(SchedulerHints schedulerHints) {
+         return new CreateServerOptions().schedulerHints(schedulerHints);
       }
    }
 

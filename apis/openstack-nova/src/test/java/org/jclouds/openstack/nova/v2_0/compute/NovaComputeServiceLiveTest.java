@@ -16,10 +16,9 @@
  */
 package org.jclouds.openstack.nova.v2_0.compute;
 
-import static java.util.logging.Logger.getAnonymousLogger;
-
-import java.util.Properties;
-
+import com.google.inject.Module;
+import org.jclouds.compute.domain.Template;
+import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.compute.internal.BaseComputeServiceLiveTest;
 import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
 import org.jclouds.openstack.nova.v2_0.config.NovaProperties;
@@ -27,7 +26,9 @@ import org.jclouds.rest.AuthorizationException;
 import org.jclouds.sshj.config.SshjSshClientModule;
 import org.testng.annotations.Test;
 
-import com.google.inject.Module;
+import java.util.Properties;
+
+import static java.util.logging.Logger.getAnonymousLogger;
 
 @Test(groups = "live", singleThreaded = true, testName = "NovaComputeServiceLiveTest")
 public class NovaComputeServiceLiveTest extends BaseComputeServiceLiveTest {
@@ -36,7 +37,13 @@ public class NovaComputeServiceLiveTest extends BaseComputeServiceLiveTest {
       provider = "openstack-nova";
    }
 
-   @Override
+    @Override
+    protected Template buildTemplate(TemplateBuilder templateBuilder) {
+        return templateBuilder.imageNameMatches("cirros").build();
+    }
+
+
+    @Override
    protected Module getSshModule() {
       return new SshjSshClientModule();
    }
@@ -89,4 +96,6 @@ public class NovaComputeServiceLiveTest extends BaseComputeServiceLiveTest {
       setIfTestSystemPropertyPresent(props, NovaProperties.AUTO_ALLOCATE_FLOATING_IPS);
       return props;
    }
+
+
 }
