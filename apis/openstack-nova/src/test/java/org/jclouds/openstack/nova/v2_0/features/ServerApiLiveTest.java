@@ -24,6 +24,7 @@ import org.jclouds.openstack.nova.v2_0.domain.BlockDeviceMapping;
 import org.jclouds.openstack.nova.v2_0.domain.Network;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
+import org.jclouds.openstack.nova.v2_0.domain.SchedulerHints;
 import org.jclouds.openstack.nova.v2_0.extensions.AvailabilityZoneApi;
 import org.jclouds.openstack.nova.v2_0.internal.BaseNovaApiLiveTest;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
@@ -144,10 +145,7 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
         for (String regionId : regions) {
             ServerApi serverApi = api.getServerApi(regionId);
             try {
-                CreateServerOptions options = CreateServerOptions.Builder.novaNetworks(
-                        // This network UUID must match an existing network.
-                        ImmutableSet.of(Network.builder().networkUuid("bc4cfa2b-2b27-4671-8e8f-73009623def0").fixedIp("192.168.55.56").build())
-                );
+                CreateServerOptions options = CreateServerOptions.Builder.schedulerHints(SchedulerHints.builder().serverGroup("02131b7c-f32a-4648-b9e9-dad6d34a24c5").build());
                 ServerCreated server = serverApi.create(hostName, imageId(regionId), "1", options);
                 serverId = server.getId();
 

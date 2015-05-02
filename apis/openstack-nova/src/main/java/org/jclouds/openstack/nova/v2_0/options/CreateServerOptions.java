@@ -255,10 +255,10 @@ public class CreateServerOptions implements MapBinder {
       }
 
       if (schedulerHints != null) {
-        return bindToRequest(request, ImmutableMap.of("server", server, "os: scheduler_hints", schedulerHints));
+        return bindToRequest(request, (Object)ImmutableMap.of("server", server, "os:scheduler_hints", schedulerHints));
       }
       else {
-        return bindToRequest(request, ImmutableMap.of("server", server));
+        return bindToRequest(request, (Object)ImmutableMap.of("server", server));
       }
 
    }
