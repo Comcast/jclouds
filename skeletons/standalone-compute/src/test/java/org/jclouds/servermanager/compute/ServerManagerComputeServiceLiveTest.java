@@ -37,7 +37,7 @@ public class ServerManagerComputeServiceLiveTest extends BaseComputeServiceLiveT
 
    @Test
    public void testTemplateBuilder() {
-      Template defaultTemplate = client.templateBuilder().build();
+      Template defaultTemplate = computeService.templateBuilder().build();
       assertEquals(defaultTemplate.getImage().getOperatingSystem().is64Bit(), true);
       assertEquals(defaultTemplate.getImage().getOperatingSystem().getVersion(), "5.3");
       assertEquals(defaultTemplate.getImage().getOperatingSystem().getFamily(), OsFamily.CENTOS);

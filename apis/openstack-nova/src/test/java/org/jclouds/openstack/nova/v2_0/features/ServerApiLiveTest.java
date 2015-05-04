@@ -22,23 +22,25 @@ import com.google.common.collect.Iterables;
 import org.jclouds.http.HttpResponseException;
 import org.jclouds.openstack.nova.v2_0.domain.BlockDeviceMapping;
 import org.jclouds.openstack.nova.v2_0.domain.Network;
-import org.jclouds.openstack.nova.v2_0.domain.Server;
-import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
 import org.jclouds.openstack.nova.v2_0.domain.SchedulerHints;
+import org.jclouds.openstack.nova.v2_0.domain.Server;
+import static org.jclouds.openstack.nova.v2_0.domain.Server.Status.ACTIVE;
+import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
 import org.jclouds.openstack.nova.v2_0.extensions.AvailabilityZoneApi;
 import org.jclouds.openstack.nova.v2_0.internal.BaseNovaApiLiveTest;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.openstack.nova.v2_0.options.RebuildServerOptions;
+import static org.jclouds.openstack.nova.v2_0.predicates.ServerPredicates.awaitActive;
 import org.jclouds.openstack.v2_0.domain.Link.Relation;
 import org.jclouds.openstack.v2_0.domain.Resource;
 import org.jclouds.openstack.v2_0.features.ExtensionApi;
 import org.jclouds.openstack.v2_0.predicates.LinkPredicates;
 import org.jclouds.rest.ResourceNotFoundException;
+import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
-
-import static org.jclouds.openstack.nova.v2_0.domain.Server.Status.ACTIVE;
-import static org.jclouds.openstack.nova.v2_0.predicates.ServerPredicates.awaitActive;
-import static org.testng.Assert.*;
 
 /**
  * Tests behavior of {@link ServerApi}
@@ -156,7 +158,7 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
             serverGroupUUID = System.getProperty(testServerGroupProperty);
         }
         else {
-            fail("Test requires system property " + testServerGroupProperty);
+            Assert.fail("Test requires system property " + testServerGroupProperty);
         }
 
         for (String regionId : regions) {
@@ -172,8 +174,8 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
                 Server serverCheck = serverApi.get(serverId);
                 assertEquals(serverCheck.getStatus(), ACTIVE);
             }
-            catch(ResourceNotFoundException e) {
-                fail("Server group " + serverGroupUUID + " was not found - please create the server group via the os-server-groups api",e);
+            catch (ResourceNotFoundException e) {
+                Assert.fail("Server group " + serverGroupUUID + " was not found - please create the server group via the os-server-groups api", e);
             } finally {
                 if (serverId != null) {
                     serverApi.delete(serverId);
