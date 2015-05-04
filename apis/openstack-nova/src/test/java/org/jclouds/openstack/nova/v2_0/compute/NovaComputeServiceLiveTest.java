@@ -17,8 +17,6 @@
 package org.jclouds.openstack.nova.v2_0.compute;
 
 import com.google.inject.Module;
-import org.jclouds.compute.domain.Template;
-import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.compute.internal.BaseComputeServiceLiveTest;
 import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
 import org.jclouds.openstack.nova.v2_0.config.NovaProperties;
@@ -36,12 +34,6 @@ public class NovaComputeServiceLiveTest extends BaseComputeServiceLiveTest {
    public NovaComputeServiceLiveTest() {
       provider = "openstack-nova";
    }
-
-    @Override
-    protected Template buildTemplate(TemplateBuilder templateBuilder) {
-        return templateBuilder.imageNameMatches("cirros").build();
-    }
-
 
     @Override
    protected Module getSshModule() {

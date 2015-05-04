@@ -26,9 +26,12 @@ import java.beans.ConstructorProperties;
 /**
  * Scheduler hints extension (alias "OS-SCH-HNT"): Hints passed directly to the scheduler via  /servers POST
  * 
- * @see <a href=
-        "http://developer.openstack.org/api-ref-compute-v2-ext.html#createServer"
-       />
+ * @see <a href="http://developer.openstack.org/api-ref-compute-v2-ext.html#createServer" />
+ *
+ * Currently contains support for server group based filters only
+ * <a href="http://docs.openstack.org/havana/config-reference/content/scheduler-filters.html#groupaffinityfilter"GroupAffinity</a>
+ * and <a href="http://docs.openstack.org/havana/config-reference/content/scheduler-filters.html#groupantiaffinityfilter"GroupAntiAffinity</a>
+ * Can be easily augmented to add support for other filters that can be configured via scheduler hints
 */
 public class SchedulerHints {
 

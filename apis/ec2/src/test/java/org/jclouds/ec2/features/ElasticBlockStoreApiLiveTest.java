@@ -256,7 +256,7 @@ public class ElasticBlockStoreApiLiveTest extends BaseComputeServiceContextLiveT
 
    @Test(enabled = false)
    public void testAddCreateVolumePermissionsToSnapshot() {
-      // TODO client.addCreateVolumePermissionsToSnapshotInRegion(defaultRegion,
+      // TODO computeService.addCreateVolumePermissionsToSnapshotInRegion(defaultRegion,
       // userIds,
       // userGroups,
       // snapshotId);
@@ -265,7 +265,7 @@ public class ElasticBlockStoreApiLiveTest extends BaseComputeServiceContextLiveT
    @Test(enabled = false)
    public void testRemoveCreateVolumePermissionsFromSnapshot() {
       // TODO
-      // client.removeCreateVolumePermissionsFromSnapshotInRegion(defaultRegion,
+      // computeService.removeCreateVolumePermissionsFromSnapshotInRegion(defaultRegion,
       // userIds,
       // userGroups,
       // snapshotId);
@@ -274,7 +274,7 @@ public class ElasticBlockStoreApiLiveTest extends BaseComputeServiceContextLiveT
    @Test(enabled = false)
    public void testResetCreateVolumePermissionsOnSnapshot() {
       // TODO
-      // client.resetCreateVolumePermissionsOnSnapshotInRegion(defaultRegion,
+      // computeService.resetCreateVolumePermissionsOnSnapshotInRegion(defaultRegion,
       // snapshotId);
    }
 

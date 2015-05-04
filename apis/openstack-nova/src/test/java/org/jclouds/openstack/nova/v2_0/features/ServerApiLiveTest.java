@@ -33,13 +33,12 @@ import org.jclouds.openstack.v2_0.domain.Link.Relation;
 import org.jclouds.openstack.v2_0.domain.Resource;
 import org.jclouds.openstack.v2_0.features.ExtensionApi;
 import org.jclouds.openstack.v2_0.predicates.LinkPredicates;
+import org.jclouds.rest.ResourceNotFoundException;
 import org.testng.annotations.Test;
 
 import static org.jclouds.openstack.nova.v2_0.domain.Server.Status.ACTIVE;
 import static org.jclouds.openstack.nova.v2_0.predicates.ServerPredicates.awaitActive;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * Tests behavior of {@link ServerApi}
@@ -47,7 +46,7 @@ import static org.testng.Assert.assertTrue;
 @Test(groups = "live", testName = "ServerApiLiveTest")
 public class ServerApiLiveTest extends BaseNovaApiLiveTest {
 
-   @Test(description = "GET /v${apiVersion}/{tenantId}/servers")
+    @Test(description = "GET /v${apiVersion}/{tenantId}/servers")
    public void testListServers() throws Exception {
       for (String regionId : regions) {
          ServerApi serverApi = api.getServerApi(regionId);
@@ -134,18 +133,37 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
    }
 
     /**
+     * This test creates a server with a scheduler hint that sets the server group
+     * used for <a href="http://docs.openstack.org/havana/config-reference/content/scheduler-filters.html#groupaffinityfilter"GroupAffinity</a>
+     * and <a href="http://docs.openstack.org/havana/config-reference/content/scheduler-filters.html#groupantiaffinityfilter"GroupAntiAffinity</a> filters
      * Openstack specific - needs compute api v2.0 extensions enabled
+     * This test needs a server group to be created
+     * (currently not implemented in jclouds, but available in the openstack nova api v2 extensions)
+     *
      * This can be tested on devstack:
-     * In apis/openstack-nova:
-     * mvn -Plive clean install "-Dtest.openstack-nova.endpoint=http://localhost:5000/v2.0" "-Dtest.openstack-nova.identity=demo:demo" "-Dtest.openstack-nova.credential=devstack" "-Dtest=org.jclouds.openstack.nova.v2_0.features.ServerApiLiveTest#testCreateWithSchedulerHints"
+     * From apis/openstack-nova:
+     * mvn -Plive clean install "-Dtest.openstack-nova.endpoint=http://localhost:5000/v2.0" "-Dtest.openstack-nova.identity=demo:demo"
+     * "-Dtest.openstack-nova.credential=devstack" "-Dtest.openstack-nova.servergroup=<servergroupuuid>"
+     * "-Dtest=org.jclouds.openstack.nova.v2_0.features.ServerApiLiveTest#testCreateWithSchedulerHintsServerGroup"
      */
-    @Test(enabled = true)
-    public void testCreateWithSchedulerHints() {
+    @Test
+    public void testCreateWithSchedulerHintsServerGroup() {
         String serverId = null;
+        String serverGroupUUID = null;
+
+        String testServerGroupProperty = "test." + provider + ".servergroup";
+        if (System.getProperties().containsKey(testServerGroupProperty)) {
+            serverGroupUUID = System.getProperty(testServerGroupProperty);
+        }
+        else {
+            fail("Test requires system property " + testServerGroupProperty);
+        }
+
         for (String regionId : regions) {
             ServerApi serverApi = api.getServerApi(regionId);
             try {
-                CreateServerOptions options = CreateServerOptions.Builder.schedulerHints(SchedulerHints.builder().serverGroup("02131b7c-f32a-4648-b9e9-dad6d34a24c5").build());
+                CreateServerOptions options = CreateServerOptions.Builder.schedulerHints
+                        (SchedulerHints.builder().serverGroup(serverGroupUUID).build());
                 ServerCreated server = serverApi.create(hostName, imageId(regionId), "1", options);
                 serverId = server.getId();
 
@@ -153,6 +171,9 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
 
                 Server serverCheck = serverApi.get(serverId);
                 assertEquals(serverCheck.getStatus(), ACTIVE);
+            }
+            catch(ResourceNotFoundException e) {
+                fail("Server group " + serverGroupUUID + " was not found - please create the server group via the os-server-groups api",e);
             } finally {
                 if (serverId != null) {
                     serverApi.delete(serverId);
@@ -160,7 +181,6 @@ public class ServerApiLiveTest extends BaseNovaApiLiveTest {
             }
         }
     }
-
 
     /**
     * This test creates a new server with a boot device from an image.

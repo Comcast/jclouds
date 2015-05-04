@@ -17,10 +17,28 @@
 package org.jclouds.compute.internal;
 
 import com.google.common.base.Function;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import static com.google.common.base.Predicates.and;
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import static com.google.common.collect.ImmutableSet.copyOf;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.collect.Iterables.transform;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Maps.uniqueIndex;
+import static com.google.common.collect.Sets.filter;
+import static com.google.common.collect.Sets.newTreeSet;
 import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -29,9 +47,36 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
-import org.jclouds.compute.*;
-import org.jclouds.compute.domain.*;
+import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.logging.Logger.getAnonymousLogger;
+import static org.jclouds.Constants.PROPERTY_USER_THREADS;
+import org.jclouds.compute.ComputeService;
+import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.ComputeTestUtils;
+import org.jclouds.compute.JettyStatements;
+import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.RunScriptOnNodesException;
+import org.jclouds.compute.domain.ComputeMetadata;
+import org.jclouds.compute.domain.ComputeType;
+import org.jclouds.compute.domain.ExecResponse;
+import org.jclouds.compute.domain.Hardware;
+import org.jclouds.compute.domain.Image;
+import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.NodeMetadata.Status;
+import org.jclouds.compute.domain.OperatingSystem;
+import org.jclouds.compute.domain.Template;
+import org.jclouds.compute.domain.TemplateBuilder;
+import static org.jclouds.compute.options.RunScriptOptions.Builder.nameTask;
+import static org.jclouds.compute.options.RunScriptOptions.Builder.wrapInInitScript;
+import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginCredentials;
+import static org.jclouds.compute.options.TemplateOptions.Builder.runAsRoot;
+import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
+import static org.jclouds.compute.predicates.NodePredicates.all;
+import static org.jclouds.compute.predicates.NodePredicates.inGroup;
+import static org.jclouds.compute.predicates.NodePredicates.runningInGroup;
+import static org.jclouds.compute.util.ComputeServiceUtils.getCores;
 import org.jclouds.compute.util.OpenSocketFinder;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
@@ -45,37 +90,30 @@ import org.jclouds.scriptbuilder.statements.java.InstallJDK;
 import org.jclouds.scriptbuilder.statements.login.AdminAccess;
 import org.jclouds.ssh.SshClient;
 import org.jclouds.ssh.SshException;
+import static org.jclouds.util.Predicates2.retry;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.*;
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.Iterables.*;
-import static com.google.common.collect.Maps.newLinkedHashMap;
-import static com.google.common.collect.Maps.uniqueIndex;
-import static com.google.common.collect.Sets.filter;
-import static com.google.common.collect.Sets.newTreeSet;
-import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.logging.Logger.getAnonymousLogger;
-import static org.jclouds.Constants.PROPERTY_USER_THREADS;
-import static org.jclouds.compute.options.RunScriptOptions.Builder.nameTask;
-import static org.jclouds.compute.options.RunScriptOptions.Builder.wrapInInitScript;
-import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginCredentials;
-import static org.jclouds.compute.options.TemplateOptions.Builder.runAsRoot;
-import static org.jclouds.compute.predicates.NodePredicates.*;
-import static org.jclouds.compute.predicates.NodePredicates.all;
-import static org.jclouds.compute.util.ComputeServiceUtils.getCores;
-import static org.jclouds.util.Predicates2.retry;
-import static org.testng.Assert.*;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Test(groups = { "integration", "live" }, singleThreaded = true)
 public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceContextLiveTest {
@@ -84,8 +122,8 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    protected Predicate<HostAndPort> socketTester;
    protected OpenSocketFinder openSocketFinder;
-   protected SortedSet<? extends NodeMetadata> nodes;
-   protected ComputeService client;
+   protected SortedSet<NodeMetadata> nodes;
+   protected ComputeService computeService;
 
    protected Template template;
    protected Map<String, String> keyPair;
@@ -124,7 +162,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    @Override
    protected void initializeContext() {
       super.initializeContext();
-      client = view.getComputeService();
+      computeService = view.getComputeService();
    }
 
    @Test(enabled = true, expectedExceptions = AuthorizationException.class)
@@ -151,16 +189,16 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = true)
    public void testImagesCache() throws Exception {
-      client.listImages();
+      computeService.listImages();
       long time = currentTimeMillis();
-      client.listImages();
+      computeService.listImages();
       long duration = currentTimeMillis() - time;
       assert duration < 1000 : format("%dms to get images", duration);
    }
 
    @Test(enabled = true, expectedExceptions = NoSuchElementException.class)
    public void testCorrectExceptionRunningNodesNotFound() throws Exception {
-      client.runScriptOnNodesMatching(runningInGroup("zebras-are-awesome"), InstallJDK.fromOpenJDK());
+      computeService.runScriptOnNodesMatching(runningInGroup("zebras-are-awesome"), InstallJDK.fromOpenJDK());
    }
 
    public void testImageById() {
@@ -174,26 +212,26 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    public void testAScriptExecutionAfterBootWithBasicTemplate() throws Exception {
       String group = this.group + "r";
       try {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       } catch (Exception e) {
 
       }
-      template = buildTemplate(client.templateBuilder());
+      template = buildTemplate(computeService.templateBuilder());
       template.getOptions().blockOnPort(22, 120);
       try {
-         Set<? extends NodeMetadata> nodes = client.createNodesInGroup(group, 1, template);
+         Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(group, 1, template);
          NodeMetadata node = get(nodes, 0);
          LoginCredentials good = node.getCredentials();
          assert good.identity != null : nodes;
 
-         for (Entry<? extends NodeMetadata, ExecResponse> response : client.runScriptOnNodesMatching(
+         for (Entry<? extends NodeMetadata, ExecResponse> response : computeService.runScriptOnNodesMatching(
                runningInGroup(group), "hostname",
                wrapInInitScript(false).runAsRoot(false).overrideLoginCredentials(good)).entrySet()) {
             checkResponseEqualsHostname(response.getValue(), response.getKey());
          }
 
          // test single-node execution
-         ExecResponse response = client.runScriptOnNode(node.getId(), "hostname",
+         ExecResponse response = computeService.runScriptOnNode(node.getId(), "hostname",
                wrapInInitScript(false).runAsRoot(false));
          checkResponseEqualsHostname(response, node);
          OperatingSystem os = node.getOperatingSystem();
@@ -207,14 +245,14 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
          // test adding AdminAccess later changes the default boot user, in this
          // case to foo, with home dir /over/ridden/foo
-         ListenableFuture<ExecResponse> future = client.submitScriptOnNode(node.getId(), AdminAccess.builder()
+         ListenableFuture<ExecResponse> future = computeService.submitScriptOnNode(node.getId(), AdminAccess.builder()
                .adminUsername("foo").adminHome("/over/ridden/foo").build(), nameTask("adminUpdate"));
 
          response = future.get(3, TimeUnit.MINUTES);
 
          assert response.getExitStatus() == 0 : node.getId() + ": " + response;
 
-         node = client.getNodeMetadata(node.getId());
+         node = computeService.getNodeMetadata(node.getId());
          // test that the node updated to the correct admin user!
          assertEquals(node.getCredentials().identity, "foo");
          assert node.getCredentials().credential != null : nodes;
@@ -223,19 +261,19 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
          assert response.getExitStatus() == 0 : node.getId() + ": " + response;
 
-         response = client.runScriptOnNode(node.getId(), "echo $USER", wrapInInitScript(false).runAsRoot(false));
+         response = computeService.runScriptOnNode(node.getId(), "echo $USER", wrapInInitScript(false).runAsRoot(false));
 
          assert response.getOutput().trim().equals("foo") : node.getId() + ": " + response;
 
       } finally {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       }
    }
 
    @Test(enabled = false)
    protected void tryBadPassword(String group, Credentials good) throws AssertionError {
       try {
-         Map<? extends NodeMetadata, ExecResponse> responses = client.runScriptOnNodesMatching(
+         Map<? extends NodeMetadata, ExecResponse> responses = computeService.runScriptOnNodesMatching(
                runningInGroup(group),
                "echo I put a bad password",
                wrapInInitScript(false).runAsRoot(false).overrideLoginCredentials(
@@ -251,7 +289,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = false)
    public void weCanCancelTasks(NodeMetadata node) throws InterruptedException, ExecutionException {
-      ListenableFuture<ExecResponse> future = client.submitScriptOnNode(node.getId(), "sleep 300",
+      ListenableFuture<ExecResponse> future = computeService.submitScriptOnNode(node.getId(), "sleep 300",
             nameTask("sleeper").runAsRoot(false));
       ExecResponse response = null;
       try {
@@ -259,11 +297,11 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
          fail(node.getId() + ": " + response);
       } catch (TimeoutException e) {
          assert !future.isDone();
-         response = client.runScriptOnNode(node.getId(), "/tmp/init-sleeper status",
+         response = computeService.runScriptOnNode(node.getId(), "/tmp/init-sleeper status",
                wrapInInitScript(false).runAsRoot(false));
          assert !response.getOutput().trim().equals("") : node.getId() + ": " + response;
          future.cancel(true);
-         response = client.runScriptOnNode(node.getId(), "/tmp/init-sleeper status",
+         response = computeService.runScriptOnNode(node.getId(), "/tmp/init-sleeper status",
                wrapInInitScript(false).runAsRoot(false));
          assert response.getOutput().trim().equals("") : node.getId() + ": " + response;
          try {
@@ -281,8 +319,8 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = true, dependsOnMethods = { "testImagesCache" })
    public void testTemplateMatch() throws Exception {
-      template = buildTemplate(client.templateBuilder());
-      Template toMatch = client.templateBuilder().imageId(template.getImage().getId()).build();
+      template = buildTemplate(computeService.templateBuilder());
+      Template toMatch = computeService.templateBuilder().imageId(template.getImage().getId()).build();
       assertEquals(toMatch.getImage(), template.getImage());
    }
 
@@ -293,13 +331,13 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    @Test(enabled = true, dependsOnMethods = "testConcurrentUseOfComputeServiceToCreateNodes")
    public void testCreateTwoNodesWithRunScript() throws Exception {
       try {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       } catch (NoSuchElementException e) {
 
       }
       refreshTemplate();
       try {
-         nodes = newTreeSet(client.createNodesInGroup(group, 2, template));
+         nodes = newTreeSet(computeService.createNodesInGroup(group, 2, template));
       } catch (RunNodesException e) {
          nodes = newTreeSet(concat(e.getSuccessfulNodes(), e.getNodeErrors().keySet()));
          throw e;
@@ -322,11 +360,11 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = true, dependsOnMethods = "testCreateTwoNodesWithRunScript")
    public void testCreateTwoNodesWithOneSpecifiedName() throws Exception {
-      template = buildTemplate(client.templateBuilder());
+      template = buildTemplate(computeService.templateBuilder());
       template.getOptions().nodeNames(ImmutableSet.of("first-node"));
       Set<? extends NodeMetadata> nodes;
       try {
-         nodes = newTreeSet(client.createNodesInGroup(group, 2, template));
+         nodes = newTreeSet(computeService.createNodesInGroup(group, 2, template));
       } catch (RunNodesException e) {
          nodes = newTreeSet(concat(e.getSuccessfulNodes(), e.getNodeErrors().keySet()));
          throw e;
@@ -347,7 +385,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    }
 
    private Template refreshTemplate() {
-      return template = addRunScriptToTemplate(buildTemplate(client.templateBuilder()));
+      return template = addRunScriptToTemplate(buildTemplate(computeService.templateBuilder()));
    }
 
    protected static Template addRunScriptToTemplate(Template template) {
@@ -379,14 +417,14 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    public void testCreateAnotherNodeWithANewContextToEnsureSharedMemIsntRequired() throws Exception {
       initializeContext();
 
-      Location existingLocation = Iterables.get(this.nodes, 0).getLocation();
-      boolean existingLocationIsAssignable = Iterables.any(client.listAssignableLocations(),
-            Predicates.equalTo(existingLocation));
+      Location existingLocation = get(this.nodes, 0).getLocation();
+      boolean existingLocationIsAssignable = Iterables.any(computeService.listAssignableLocations(),
+              Predicates.equalTo(existingLocation));
 
       if (existingLocationIsAssignable) {
          getAnonymousLogger().info("creating another node based on existing nodes' location: " + existingLocation);
-         template = buildTemplate(client.templateBuilder());
-         template = addRunScriptToTemplate(client.templateBuilder().fromTemplate(template)
+         template = buildTemplate(computeService.templateBuilder());
+         template = addRunScriptToTemplate(computeService.templateBuilder().fromTemplate(template)
                .locationId(existingLocation.getId()).build());
       } else {
          refreshTemplate();
@@ -395,7 +433,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
                      template.getLocation()));
       }
 
-      Set<? extends NodeMetadata> nodes = client.createNodesInGroup(group, 1, template);
+      Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(group, 1, template);
       assertEquals(nodes.size(), 1);
       checkNodes(nodes, group, "bootstrap");
       NodeMetadata node = Iterables.getOnlyElement(nodes);
@@ -420,11 +458,11 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
             final int groupNum = i;
             final String group = "twin" + groupNum;
             groups.add(group);
-            template = buildTemplate(client.templateBuilder());
+            template = buildTemplate(computeService.templateBuilder());
             template.getOptions().inboundPorts(22, 8080).blockOnPort(22, 300 + groupNum);
             ListenableFuture<NodeMetadata> future = userExecutor.submit(new Callable<NodeMetadata>() {
                public NodeMetadata call() throws Exception {
-                  NodeMetadata node = getOnlyElement(client.createNodesInGroup(group, 1, template));
+                  NodeMetadata node = getOnlyElement(computeService.createNodesInGroup(group, 1, template));
                   getAnonymousLogger().info("Started node " + node.getId());
                   return node;
                }
@@ -437,7 +475,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
       } finally {
          for (String group : groups) {
-            client.destroyNodesMatching(inGroup(group));
+            computeService.destroyNodesMatching(inGroup(group));
          }
       }
    }
@@ -451,7 +489,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    protected Map<? extends NodeMetadata, ExecResponse> runScriptWithCreds(final String group, OperatingSystem os,
          LoginCredentials creds) throws RunScriptOnNodesException {
-      return client.runScriptOnNodesMatching(runningInGroup(group), InstallJDK.fromOpenJDK(),
+      return computeService.runScriptOnNodesMatching(runningInGroup(group), InstallJDK.fromOpenJDK(),
             overrideLoginCredentials(creds).nameTask("runScriptWithCreds"));
    }
 
@@ -479,7 +517,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    @Test(enabled = true, dependsOnMethods = "testCreateAnotherNodeWithANewContextToEnsureSharedMemIsntRequired")
    public void testGet() throws Exception {
       Map<String, ? extends NodeMetadata> metadataMap = newLinkedHashMap(uniqueIndex(
-            filter(client.listNodesDetailsMatching(all()), and(inGroup(group), not(TERMINATED))),
+            filter(computeService.listNodesDetailsMatching(all()), and(inGroup(group), not(TERMINATED))),
             new Function<NodeMetadata, String>() {
 
                @Override
@@ -490,7 +528,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
             }));
       for (NodeMetadata node : nodes) {
          metadataMap.remove(node.getId());
-         NodeMetadata metadata = client.getNodeMetadata(node.getId());
+         NodeMetadata metadata = computeService.getNodeMetadata(node.getId());
          assertEquals(metadata.getProviderId(), node.getProviderId());
          assertEquals(metadata.getGroup(), node.getGroup());
          assertLocationSameOrChild(checkNotNull(metadata.getLocation(), "location of %s", metadata), template.getLocation());
@@ -513,7 +551,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = true, dependsOnMethods = "testGet")
    public void testReboot() throws Exception {
-      Set<? extends NodeMetadata> rebootNodes = client.rebootNodesMatching(inGroup(group));
+      Set<? extends NodeMetadata> rebootNodes = computeService.rebootNodesMatching(inGroup(group));
       for (ComputeMetadata node : rebootNodes) {
          assertNotNull(node);
          assert node.getProviderId() != null : node;
@@ -527,7 +565,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    @Test(enabled = true, dependsOnMethods = "testReboot")
    public void testSuspendResume() throws Exception {
 
-      Set<? extends NodeMetadata> suspendedNodes = client.suspendNodesMatching(inGroup(group));
+      Set<? extends NodeMetadata> suspendedNodes = computeService.suspendNodesMatching(inGroup(group));
       for (ComputeMetadata node : suspendedNodes) {
          assertNotNull(node);
          assert node.getProviderId() != null : node;
@@ -548,7 +586,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
       }) : stoppedNodes;
 
-      Set<? extends NodeMetadata> resumedNodes = client.resumeNodesMatching(inGroup(group));
+      Set<? extends NodeMetadata> resumedNodes = computeService.resumeNodesMatching(inGroup(group));
       for (ComputeMetadata node : resumedNodes) {
          assertNotNull(node);
          assert node.getProviderId() != null : node;
@@ -560,7 +598,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = true, dependsOnMethods = "testSuspendResume")
    public void testListNodes() throws Exception {
-      for (ComputeMetadata node : client.listNodes()) {
+      for (ComputeMetadata node : computeService.listNodes()) {
          assert node.getProviderId() != null : node;
          assert node.getLocation() != null : node;
          assertEquals(node.getType(), ComputeType.NODE);
@@ -579,7 +617,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
          }));
 
-      SortedSet<? extends NodeMetadata> listedNodes = ImmutableSortedSet.copyOf(client.listNodesByIds(nodeIds));
+      SortedSet<NodeMetadata> listedNodes = ImmutableSortedSet.copyOf(computeService.listNodesByIds(nodeIds));
       // newTreeSet is here because elementsEqual cares about ordering.
       assertTrue(Iterables.elementsEqual(nodes, listedNodes),
               "nodes and listNodesByIds should be identical: was " + listedNodes + " but should be " + nodes);
@@ -587,7 +625,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(enabled = true, dependsOnMethods = "testSuspendResume")
    public void testGetNodesWithDetails() throws Exception {
-      for (NodeMetadata node : client.listNodesDetailsMatching(all())) {
+      for (NodeMetadata node : computeService.listNodesDetailsMatching(all())) {
          assert node.getProviderId() != null : node;
          assert node.getLocation() != null : node;
          assertEquals(node.getType(), ComputeType.NODE);
@@ -609,7 +647,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    @Test(enabled = true, dependsOnMethods = { "testListNodes", "testGetNodesWithDetails", "testListNodesByIds" })
    public void testDestroyNodes() {
       int toDestroy = refreshNodes().size();
-      Set<? extends NodeMetadata> destroyed = client.destroyNodesMatching(inGroup(group));
+      Set<? extends NodeMetadata> destroyed = computeService.destroyNodesMatching(inGroup(group));
       assertEquals(toDestroy, destroyed.size());
       Uninterruptibles.sleepUninterruptibly(100, TimeUnit.SECONDS);
       for (NodeMetadata node : filter(client.listNodesDetailsMatching(all()), inGroup(group))) {
@@ -620,7 +658,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    }
 
    private Set<? extends NodeMetadata> refreshNodes() {
-      return filter(client.listNodesDetailsMatching(all()), and(inGroup(group), not(TERMINATED)));
+      return filter(computeService.listNodesDetailsMatching(all()), and(inGroup(group), not(TERMINATED)));
    }
 
    static class ServiceStats {
@@ -637,7 +675,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    protected ServiceStats trackAvailabilityOfProcessOnNode(Statement process, String processName, NodeMetadata node) {
       ServiceStats stats = new ServiceStats();
       Stopwatch watch = Stopwatch.createStarted();
-      ExecResponse exec = client.runScriptOnNode(node.getId(), process, runAsRoot(false).wrapInInitScript(false));
+      ExecResponse exec = computeService.runScriptOnNode(node.getId(), process, runAsRoot(false).wrapInInitScript(false));
       stats.backgroundProcessMilliseconds = watch.elapsed(TimeUnit.MILLISECONDS);
       watch.reset().start();
 
@@ -659,7 +697,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
       String group = this.group + "s";
       try {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       } catch (Exception e) {
 
       }
@@ -667,7 +705,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
       try {
          createAndRunAServiceInGroup(group);
       } finally {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       }
 
    }
@@ -679,10 +717,10 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
       ImmutableSet<String> tags = ImmutableSet.of(group);
       Stopwatch watch = Stopwatch.createStarted();
 
-      template = buildTemplate(client.templateBuilder());
+      template = buildTemplate(computeService.templateBuilder());
       template.getOptions().inboundPorts(22, 8080).blockOnPort(22, 300).userMetadata(userMetadata).tags(tags);
 
-      NodeMetadata node = getOnlyElement(client.createNodesInGroup(group, 1, template));
+      NodeMetadata node = getOnlyElement(computeService.createNodesInGroup(group, 1, template));
       long createSeconds = watch.elapsed(TimeUnit.SECONDS);
 
       final String nodeId = node.getId();
@@ -691,24 +729,24 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
       checkTagsInNodeEquals(node, tags);
 
       getAnonymousLogger().info(
-            format("<< available node(%s) os(%s) in %ss", node.getId(), node.getOperatingSystem(), createSeconds));
+              format("<< available node(%s) os(%s) in %ss", node.getId(), node.getOperatingSystem(), createSeconds));
 
       watch.reset().start();
 
-      client.runScriptOnNode(nodeId, JettyStatements.install(), nameTask("configure-jetty"));
+      computeService.runScriptOnNode(nodeId, JettyStatements.install(), nameTask("configure-jetty"));
 
       long configureSeconds = watch.elapsed(TimeUnit.SECONDS);
 
       getAnonymousLogger().info(
-            format(
-                  "<< configured node(%s) with %s and jetty %s in %ss",
-                  nodeId,
-                  exec(nodeId, "java -fullversion"),
-                  exec(nodeId, JettyStatements.version()), configureSeconds));
+              format(
+                      "<< configured node(%s) with %s and jetty %s in %ss",
+                      nodeId,
+                      exec(nodeId, "java -fullversion"),
+                      exec(nodeId, JettyStatements.version()), configureSeconds));
 
       trackAvailabilityOfProcessOnNode(JettyStatements.start(), "start jetty", node);
 
-      client.runScriptOnNode(nodeId, JettyStatements.stop(), runAsRoot(false).wrapInInitScript(false));
+      computeService.runScriptOnNode(nodeId, JettyStatements.stop(), runAsRoot(false).wrapInInitScript(false));
 
       trackAvailabilityOfProcessOnNode(JettyStatements.start(), "start jetty", node);
    }
@@ -718,7 +756,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    }
 
    protected String exec(final String nodeId, Statement command) {
-      return client.runScriptOnNode(nodeId, command, runAsRoot(false).wrapInInitScript(false)).getOutput().trim();
+      return computeService.runScriptOnNode(nodeId, command, runAsRoot(false).wrapInInitScript(false)).getOutput().trim();
    }
 
    protected void checkUserMetadataContains(NodeMetadata node, ImmutableMap<String, String> userMetadata) {
@@ -731,7 +769,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    }
 
    public void testListImages() throws Exception {
-      for (Image image : client.listImages()) {
+      for (Image image : computeService.listImages()) {
          assert image.getProviderId() != null : image;
          // image.getLocationId() can be null, if it is a location-free image
          assertEquals(image.getType(), ComputeType.IMAGE);
@@ -740,7 +778,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
 
    @Test(groups = { "integration", "live" })
    public void testGetAssignableLocations() throws Exception {
-      for (Location location : client.listAssignableLocations()) {
+      for (Location location : computeService.listAssignableLocations()) {
          getAnonymousLogger().warning("location " + location);
          assert location.getId() != null : location;
          assert location != location.getParent() : location;
@@ -775,23 +813,23 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    public void testOptionToNotBlock() throws Exception {
       String group = this.group + "block";
       try {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       } catch (Exception e) {
 
       }
       // no inbound ports
-      template = buildTemplate(client.templateBuilder());
+      template = buildTemplate(computeService.templateBuilder());
       template.getOptions().blockUntilRunning(false).inboundPorts();
       try {
          long time = currentTimeMillis();
-         Set<? extends NodeMetadata> nodes = client.createNodesInGroup(group, 1, template);
+         Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(group, 1, template);
          NodeMetadata node = getOnlyElement(nodes);
          assert node.getStatus() != Status.RUNNING : node;
          long duration = (currentTimeMillis() - time) / 1000;
          assert duration < nonBlockDurationSeconds : format("duration(%d) longer than expected(%d) seconds! ",
                duration, nonBlockDurationSeconds);
       } finally {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       }
    }
 
@@ -801,7 +839,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    }
 
    public void testListSizes() throws Exception {
-      for (Hardware hardware : client.listHardwareProfiles()) {
+      for (Hardware hardware : computeService.listHardwareProfiles()) {
          assert hardware.getProviderId() != null : hardware;
          assert getCores(hardware) > 0 : hardware;
          assert hardware.getRam() > 0 : hardware;
@@ -821,11 +859,11 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
    }
 
    protected void doCompareSizes() throws Exception {
-      Hardware defaultSize = client.templateBuilder().build().getHardware();
+      Hardware defaultSize = computeService.templateBuilder().build().getHardware();
 
-      Hardware smallest = client.templateBuilder().smallest().build().getHardware();
-      Hardware fastest = client.templateBuilder().fastest().build().getHardware();
-      Hardware biggest = client.templateBuilder().biggest().build().getHardware();
+      Hardware smallest = computeService.templateBuilder().smallest().build().getHardware();
+      Hardware fastest = computeService.templateBuilder().fastest().build().getHardware();
+      Hardware biggest = computeService.templateBuilder().biggest().build().getHardware();
 
       getAnonymousLogger().info("smallest " + smallest);
       getAnonymousLogger().info("fastest " + fastest);
@@ -883,7 +921,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
             // Destroy all nodes in the group but also make sure to destroy other created nodes that might not be in it.
             // The "testCreateTwoNodesWithOneSpecifiedName" creates nodes with an explicit name that puts them outside the group,
             // so the list of nodes should also be taken into account when destroying the nodes.
-            client.destroyNodesMatching(Predicates.<NodeMetadata> or(inGroup(group), (Predicate<NodeMetadata>) in(nodes)));
+            computeService.destroyNodesMatching(Predicates.<NodeMetadata>or(inGroup(group), in(nodes)));
          }
       } catch (Exception e) {
 

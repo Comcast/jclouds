@@ -99,10 +99,10 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
 
    @Test(enabled = true, dependsOnMethods = "testCorrectAuthException")
    public void testImagesResolveCorrectly() {
-      Template defaultTemplate = client.templateBuilder().build();
+      Template defaultTemplate = computeService.templateBuilder().build();
       assertEquals(defaultTemplate.getImage().getId(), defaultTemplate.getImage().getLocation().getId() + "/"
                + defaultTemplate.getImage().getProviderId());
-      Template byId = client.templateBuilder().imageId(defaultTemplate.getImage().getId()).build();
+      Template byId = computeService.templateBuilder().imageId(defaultTemplate.getImage().getId()).build();
       assertEquals(byId.getImage(), defaultTemplate.getImage());
    }
 
@@ -121,7 +121,7 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
 
       String group = this.group + "o";
 
-      TemplateOptions options = client.templateOptions();
+      TemplateOptions options = computeService.templateOptions();
 
       options.as(EC2TemplateOptions.class).securityGroups(group);
       options.as(EC2TemplateOptions.class).clientToken(Integer.toHexString(random.nextInt(65536 * 1024)));
@@ -146,13 +146,13 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
          // an arbitrary command to run
          options.runScript(Statements.exec("find /usr"));
          
-         Set<? extends NodeMetadata> nodes = client.createNodesInGroup(group, 1, options);
+         Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(group, 1, options);
          NodeMetadata first = Iterables.get(nodes, 0);
          assert first.getCredentials() != null : first;
          assert first.getCredentials().identity != null : first;
 
          // Verify that the output of createNodesInGroup is the same.
-         assertEquals(client.createNodesInGroup(group, 1, options), nodes, "Idempotency failing - got different instances");
+         assertEquals(computeService.createNodesInGroup(group, 1, options), nodes, "Idempotency failing - got different instances");
          
          startedId = Iterables.getOnlyElement(nodes).getProviderId();
 
@@ -174,7 +174,7 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
                      .build());
 
       } finally {
-         client.destroyNodesMatching(NodePredicates.inGroup(group));
+         computeService.destroyNodesMatching(NodePredicates.inGroup(group));
          if (startedId != null) {
             // ensure we didn't delete these resources!
             assertEquals(keyPairClient.describeKeyPairsInRegion(null, group).size(), 1);
@@ -194,7 +194,7 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
 
          context = createView(overrides, setupModules());
 
-         TemplateOptions options = client.templateOptions();
+         TemplateOptions options = computeService.templateOptions();
 
          options.blockOnPort(22, 300);
          options.inboundPorts(22);
@@ -297,7 +297,7 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
                .mapEBSSnapshotToDeviceName("/dev/sdo", snapshot.getId(), volumeSize, true);
 
       try {
-         NodeMetadata node = Iterables.getOnlyElement(client.createNodesInGroup(group, 1, template));
+         NodeMetadata node = Iterables.getOnlyElement(computeService.createNodesInGroup(group, 1, template));
 
          // TODO figure out how to validate the ephemeral drive. perhaps with df -k?
 
@@ -325,7 +325,7 @@ public class EC2ComputeServiceLiveTest extends BaseComputeServiceLiveTest {
          assertEquals(snapshot.getId(), volume.getSnapshotId());
 
       } finally {
-         client.destroyNodesMatching(NodePredicates.inGroup(group));
+         computeService.destroyNodesMatching(NodePredicates.inGroup(group));
          ebsClient.deleteSnapshotInRegion(snapshot.getRegion(), snapshot.getId());
       }
    }

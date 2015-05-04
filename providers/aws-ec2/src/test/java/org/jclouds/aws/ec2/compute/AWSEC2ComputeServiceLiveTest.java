@@ -94,7 +94,7 @@ public class AWSEC2ComputeServiceLiveTest extends EC2ComputeServiceLiveTest {
       ImmutableSet<String> tags = ImmutableSet.of(group);
 
       // note that if you change the location, you must also specify image parameters
-      Template template = client.templateBuilder().locationId(region).osFamily(AMZN_LINUX).os64Bit(true).build();
+      Template template = computeService.templateBuilder().locationId(region).osFamily(AMZN_LINUX).os64Bit(true).build();
       template.getOptions().tags(tags);
       template.getOptions().userMetadata(userMetadata);
       template.getOptions().tags(tags);
@@ -123,7 +123,7 @@ public class AWSEC2ComputeServiceLiveTest extends EC2ComputeServiceLiveTest {
          assert result.getKeyMaterial() != null : result;
          template.getOptions().overrideLoginPrivateKey(result.getKeyMaterial());
 
-         Set<? extends NodeMetadata> nodes = client.createNodesInGroup(group, 1, template);
+         Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(group, 1, template);
          NodeMetadata first = getOnlyElement(nodes);
 
          checkUserMetadataContains(first, userMetadata);
@@ -142,7 +142,7 @@ public class AWSEC2ComputeServiceLiveTest extends EC2ComputeServiceLiveTest {
          assertEquals(instance.getMonitoringState(), MonitoringState.ENABLED);
 
          // generate some load
-         ListenableFuture<ExecResponse> future = client.submitScriptOnNode(first.getId(), Statements
+         ListenableFuture<ExecResponse> future = computeService.submitScriptOnNode(first.getId(), Statements
                   .exec("while true; do true; done"), runAsRoot(false).nameTask("cpuSpinner"));
 
          // monitoring granularity for free tier is 5 minutes, so lets make sure we have data.
@@ -187,7 +187,7 @@ public class AWSEC2ComputeServiceLiveTest extends EC2ComputeServiceLiveTest {
                   first.getCredentials().identity).privateKey(result.getKeyMaterial()).build());
 
       } finally {
-         client.destroyNodesMatching(NodePredicates.inGroup(group));
+         computeService.destroyNodesMatching(NodePredicates.inGroup(group));
          if (startedId != null) {
             // ensure we didn't delete these resources!
             assertEquals(keyPairApi.describeKeyPairsInRegion(region, group).size(), 1);

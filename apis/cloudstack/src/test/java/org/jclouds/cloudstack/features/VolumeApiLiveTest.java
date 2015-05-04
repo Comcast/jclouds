@@ -250,11 +250,11 @@ public class VolumeApiLiveTest extends BaseCloudStackApiLiveTest {
 
 //   //uncomment to force a cleanup of volumes (since test failures can leave messes) 
 //   public void deleteAllWeUsed() {
-//      for (Volume v: client.getVolumeApi().listVolumes()) {
+//      for (Volume v: computeService.getVolumeApi().listVolumes()) {
 //         if (v.getName().startsWith(prefix)) {
 //            logger.warn("found apparent detritus, deleting: %s", v);
 //            try {
-//               client.getVolumeApi().deleteVolume(v.getId());
+//               computeService.getVolumeApi().deleteVolume(v.getId());
 //            } catch (Exception e) {
 //               logger.warn(e, "failed to delete %s: %s", v, e);
 //            }

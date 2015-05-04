@@ -67,7 +67,7 @@ public class GoGridComputeServiceLiveTest extends BaseComputeServiceLiveTest {
       String group = this.group + "ram";
       GoGridApi api = view.utils().injector().getInstance(GoGridApi.class);
       try {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       } catch (Exception e) {
 
       }
@@ -76,7 +76,7 @@ public class GoGridComputeServiceLiveTest extends BaseComputeServiceLiveTest {
 
       String ram = get(api.getServerServices().getRamSizes(), 1).getName();
       try {
-         NodeMetadata node = getOnlyElement(client.createNodesInGroup(group, 1));
+         NodeMetadata node = getOnlyElement(computeService.createNodesInGroup(group, 1));
 
          Server updatedServer = api.getServerServices().editServerRam(Long.valueOf(node.getId()), ram);
          assertNotNull(updatedServer);
@@ -86,7 +86,7 @@ public class GoGridComputeServiceLiveTest extends BaseComputeServiceLiveTest {
                ram);
 
       } finally {
-         client.destroyNodesMatching(inGroup(group));
+         computeService.destroyNodesMatching(inGroup(group));
       }
    }
 }
