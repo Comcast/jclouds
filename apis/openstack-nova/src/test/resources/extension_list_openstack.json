@@ -135,6 +135,14 @@
             "namespace": "http://docs.openstack.org/compute/ext/availabilityzone/api/v1.1",
             "alias": "os-availability-zone",
             "description": "1. Add availability_zone to the Create Server v1.1 API.\n       2. Add availability zones describing.\n    "
+        },
+        {
+          "updated": "2015-05-11T00:00:00+00:00",
+          "name": "ServerGroups",
+          "links": [],
+          "namespace": "https://docs.openstack.org/ext/servergroups/api/v1.1",
+          "alias": "os-server-groups",
+          "description": "Server groups support"
         }
     ]
 }

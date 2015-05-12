@@ -126,7 +126,14 @@ public final class ExtensionNamespaces {
     */
    public static final String HYPERVISORS = "http://docs.openstack.org/compute/ext/hypervisors/api/v1.1";
 
+    /**
+     * Server groups extension
+     */
+   public static final String SERVER_GROUPS = "http://docs.openstack.org/compute/ext/servergroups/api/v2";
+
+
    private ExtensionNamespaces() {
       throw new AssertionError("intentionally unimplemented");
    }
+
 }

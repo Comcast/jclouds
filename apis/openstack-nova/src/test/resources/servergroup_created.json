@@ -1,0 +1,12 @@
+{
+  "server_group" :
+    {
+      "members" : [],
+      "name" : "antiaffinity",
+      "policies" : [
+        "anti-affinity"
+      ],
+      "id" : "f612aca1-abad-4d21-81ee-0413f7583dc7",
+      "metadata" : {}
+    }
+}

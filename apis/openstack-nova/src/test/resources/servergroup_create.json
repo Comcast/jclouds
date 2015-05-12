@@ -1,0 +1,9 @@
+{
+  "server_group": {
+    "name": "antiaffinity",
+    "policies": [
+      "anti-affinity"
+    ]
+  }
+}
+

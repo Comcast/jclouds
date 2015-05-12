@@ -311,6 +311,14 @@
           "namespace": "http://docs.openstack.org/compute/ext/hypervisors/api/v1.1",
           "alias": "os-hypervisors",
           "description": "Admin-only hypervisor administration."
+        },
+        {
+          "updated": "2015-05-11T00:00:00+00:00",
+          "name": "ServerGroups",
+          "links": [],
+          "namespace": "http://docs.openstack.org/compute/ext/servergroups/api/v2",
+          "alias": "os-server-groups",
+          "description": "Server groups support"
         }
     ]
 }
