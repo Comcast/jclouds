@@ -26,7 +26,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Defines a security group
+ * Defines a server group
 */
 public class ServerGroup {
 
@@ -35,7 +35,7 @@ public class ServerGroup {
    }
 
    public Builder<?> toBuilder() {
-      return new ConcreteBuilder().fromSecurityGroup(this);
+      return new ConcreteBuilder().fromServerGroup(this);
    }
 
    public abstract static class Builder<T extends Builder<T>>  {
@@ -68,10 +68,8 @@ public class ServerGroup {
          return new ServerGroup(id, policies);
       }
 
-      public T fromSecurityGroup(ServerGroup in) {
-         return this
-                  .id(in.getId())
-                  .policies(in.getPolicies());
+      public T fromServerGroup(ServerGroup in) {
+         return this.id(in.getId()).policies(in.getPolicies());
       }
    }
 

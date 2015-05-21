@@ -44,7 +44,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 /**
- * Provides access to the OpenStack Compute (Nova) Security Group extension API.
+ * Provides access to the OpenStack Compute (Nova) server Group extension API.
  */
 @Beta
 @Extension(of = ServiceType.COMPUTE, namespace = ExtensionNamespaces.SERVER_GROUPS)
@@ -52,9 +52,9 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface ServerGroupApi {
    /**
-    * List all Security Groups.
+    * List all server Groups.
     *
-    * @return all Security Groups
+    * @return all server Groups
     */
    @Named("ServerGroup:list")
    @GET
@@ -64,9 +64,9 @@ public interface ServerGroupApi {
    FluentIterable<ServerGroup> list();
 
    /**
-    * Get a specific Security Group
+    * Get a specific server Group
     *
-    * @return a specific Security Group
+    * @return a specific server Group
     */
    @Named("ServerGroup:get")
    @GET
@@ -77,9 +77,9 @@ public interface ServerGroupApi {
    ServerGroup get(@PathParam("id") String id);
 
    /**
-    * Create a Security Group
+    * Create a server Group
     *
-    * @return a new Security Group
+    * @return a new server Group
     */
    @Named("ServerGroup:create")
    @POST
@@ -90,7 +90,7 @@ public interface ServerGroupApi {
    ServerGroup create(@PayloadParam("name") String name, @PayloadParam("policies") List<String> policies);
 
    /**
-    * Delete a Security Group.
+    * Delete a server Group.
     *
     * @return true on success and false if not found
     */

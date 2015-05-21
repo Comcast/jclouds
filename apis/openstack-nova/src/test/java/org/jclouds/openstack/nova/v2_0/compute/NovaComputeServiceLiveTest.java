@@ -35,7 +35,7 @@ public class NovaComputeServiceLiveTest extends BaseComputeServiceLiveTest {
       provider = "openstack-nova";
    }
 
-    @Override
+   @Override
    protected Module getSshModule() {
       return new SshjSshClientModule();
    }
