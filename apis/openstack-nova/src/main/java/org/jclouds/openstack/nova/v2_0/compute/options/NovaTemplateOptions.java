@@ -92,7 +92,7 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
    protected boolean configDrive;
    protected Set<Network> novaNetworks;
    protected String availabilityZone;
-   protected Optional<SchedulerHints> schedulerHints = Optional.absent();
+   private Optional<SchedulerHints> schedulerHints = Optional.absent();
 
    @Override
    public boolean equals(Object o) {
@@ -134,9 +134,9 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
       toString.add("configDrive", configDrive);
       toString.add("novaNetworks", novaNetworks);
       toString.add("availabilityZone", availabilityZone);
-       if (schedulerHints.isPresent()) {
-           toString.add("schedulerHints", schedulerHints.get());
-       }
+      if (schedulerHints.isPresent()) {
+        toString.add("schedulerHints", schedulerHints.get());
+      }
       return toString;
    }
 
@@ -226,6 +226,14 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
    }
 
    /**
+    * @see CreateServerOptions#getSchedulerHints()
+    */
+   public NovaTemplateOptions schedulerHints(SchedulerHints schedulerHints) {
+      this.schedulerHints = Optional.of(schedulerHints);
+      return this;
+   }
+
+   /**
     * The floating IP pool name(s) to use when allocating a FloatingIP. Applicable
     * only if #shouldAutoAssignFloatingIp() returns true. If not set will attempt to
     * use whatever FloatingIP(s) can be found regardless of which pool they originated
@@ -299,6 +307,10 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
     */
    public String getAvailabilityZone() {
       return availabilityZone;
+   }
+
+   public Optional<SchedulerHints> getSchedulerHints() {
+      return schedulerHints;
    }
 
    public static class Builder {
@@ -501,6 +513,15 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
          NovaTemplateOptions options = new NovaTemplateOptions();
          return options.availabilityZone(availabilityZone);
       }
+
+      /**
+       * @see NovaTemplateOptions#getSchedulerHints()
+       */
+      public static NovaTemplateOptions schedulerHints(SchedulerHints schedulerHints) {
+         NovaTemplateOptions options = new NovaTemplateOptions();
+         return options.schedulerHints(schedulerHints);
+      }
+
    }
 
    // methods that only facilitate returning the correct object type

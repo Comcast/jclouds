@@ -28,6 +28,7 @@ import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 
 import org.jclouds.compute.options.TemplateOptions;
+import org.jclouds.openstack.nova.v2_0.domain.SchedulerHints;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.testng.annotations.Test;
 
@@ -200,6 +201,14 @@ public class NovaTemplateOptionsTest {
       NovaTemplateOptions options = new NovaTemplateOptions();
       options.availabilityZone("nova");
       assertEquals(options.getAvailabilityZone(), "nova");
+   }
+
+   @Test
+   public void testSchedulerHints() {
+      NovaTemplateOptions options = new NovaTemplateOptions();
+      SchedulerHints schedulerHints = SchedulerHints.builder().serverGroup("testgroup").build();
+      options.schedulerHints(schedulerHints);
+      assertEquals(options.getSchedulerHints().get(), schedulerHints);
    }
 
    @Test
