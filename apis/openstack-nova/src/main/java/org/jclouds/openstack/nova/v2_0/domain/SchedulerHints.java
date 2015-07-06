@@ -57,8 +57,7 @@ public class SchedulerHints {
       }
 
       public Builder  fromSchedulerHints(SchedulerHints in) {
-         return this
-               .serverGroup(in.getServerGroup());
+         return this.serverGroup(in.getServerGroup());
       }
 
       protected Builder self(){

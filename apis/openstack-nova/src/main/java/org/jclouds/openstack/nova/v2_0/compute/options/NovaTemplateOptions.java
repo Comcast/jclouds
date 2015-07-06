@@ -26,7 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jclouds.compute.options.TemplateOptions;
+import org.jclouds.compute.reference.ComputeServiceConstants;
 import org.jclouds.domain.LoginCredentials;
+import org.jclouds.logging.Logger;
 import org.jclouds.openstack.nova.v2_0.domain.Network;
 import org.jclouds.openstack.nova.v2_0.domain.SchedulerHints;
 import org.jclouds.scriptbuilder.domain.Statement;
@@ -35,6 +37,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+
+import javax.annotation.Resource;
+import javax.inject.Named;
 
 /**
  * Contains options supported in the {@code ComputeService#runNode} operation on the
@@ -51,7 +56,11 @@ import com.google.common.collect.ImmutableSet;
  * <code>
  */
 public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
-   @Override
+    @Resource
+    @Named(ComputeServiceConstants.COMPUTE_LOGGER)
+    protected Logger logger = Logger.NULL;
+
+    @Override
    public NovaTemplateOptions clone() {
       NovaTemplateOptions options = new NovaTemplateOptions();
       copyTo(options);
@@ -80,6 +89,10 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
          eTo.configDrive(getConfigDrive());
          eTo.novaNetworks(getNovaNetworks());
          eTo.availabilityZone(getAvailabilityZone());
+
+          if (getSchedulerHints().isPresent()) {
+              eTo.schedulerHints(getSchedulerHints().get());
+          }
       }
    }
 
