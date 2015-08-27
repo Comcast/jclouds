@@ -102,7 +102,7 @@ public class ParseServerTest extends BaseItemParserTest<Server> {
             )
             .addresses(ImmutableMultimap.<String, Address>builder()
                   .putAll("public", createV4("67.23.10.132"), createV6("::babe:67.23.10.132"), createV4("67.23.10.131"), createV6("::babe:4317:0A83"))
-                  .putAll("private", createV4("10.176.42.16"), createV6("::babe:10.176.42.16"))
+                  .putAll("private", createV4("10.176.42.16"), createV6("fd00::1:ff4e:3e:9:e"))
                   .build())
             .links(Link.create(
                         Relation.SELF, URI.create("http://servers.api.openstack.org/v2/1234/servers/71752")),

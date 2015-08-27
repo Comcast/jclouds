@@ -44,6 +44,13 @@ public class InetAddresses2 {
             // 16-bit Block (/16 prefix, 256/C) 192.168.0.0 192.168.255.255 65536
             if (in.indexOf("192.168.") == 0)
                return true;
+
+            //ipv6 addresses
+            if (in.toLowerCase().startsWith("fc"))
+               return true;
+
+            if (in.toLowerCase().startsWith("fd"))
+               return true;
          }
          return false;
       }
