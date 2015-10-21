@@ -72,11 +72,11 @@ public class Predicates2 {
    /**
     * @see org.jclouds.compute.config.ComputeServiceProperties#POLL_INITIAL_PERIOD
     */
-   public static final long DEFAULT_PERIOD = 50l;
+   public static final long DEFAULT_PERIOD = 5000l;
    /**
     * @see org.jclouds.compute.config.ComputeServiceProperties#POLL_MAX_PERIOD
     */
-   public static final long DEFAULT_MAX_PERIOD = 1000l;
+   public static final long DEFAULT_MAX_PERIOD = 30000l;
 
    /**
     * like {@link #retry(Predicate, long, long, long, TimeUnit)} where {@code unit} is in milliseconds, {@code period}
