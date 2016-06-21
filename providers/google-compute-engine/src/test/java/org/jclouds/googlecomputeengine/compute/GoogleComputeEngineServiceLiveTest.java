@@ -61,7 +61,7 @@ public class GoogleComputeEngineServiceLiveTest extends BaseComputeServiceLiveTe
    }
 
    public void testListHardwareProfiles() throws Exception {
-      GoogleComputeEngineApi api = client.getContext().unwrapApi(GoogleComputeEngineApi.class);
+      GoogleComputeEngineApi api = computeService.getContext().unwrapApi(GoogleComputeEngineApi.class);
       ImmutableSet.Builder<String> deprecatedMachineTypes = ImmutableSet.builder();
       for (MachineType machine : api.machineTypesInZone(DEFAULT_ZONE_NAME).list().next()) {
          if (machine.deprecated() != null) {
@@ -69,7 +69,7 @@ public class GoogleComputeEngineServiceLiveTest extends BaseComputeServiceLiveTe
          }
       }
       ImmutableSet<String> deprecatedMachineTypeIds = deprecatedMachineTypes.build();
-      for (Hardware hardwareProfile : client.listHardwareProfiles()) {
+      for (Hardware hardwareProfile : computeService.listHardwareProfiles()) {
          assertFalse(contains(deprecatedMachineTypeIds, hardwareProfile.getId()));
       }
    }
@@ -77,25 +77,25 @@ public class GoogleComputeEngineServiceLiveTest extends BaseComputeServiceLiveTe
    public void testCreatePreemptibleNodeWithSsd() throws Exception {
       String group = this.group + "ssd";
       try {
-         TemplateOptions options = client.templateOptions();
+         TemplateOptions options = computeService.templateOptions();
 
          options.as(GoogleComputeEngineTemplateOptions.class).bootDiskType("pd-ssd").preemptible(true);
 
          // create a node
          Set<? extends NodeMetadata> nodes =
-               client.createNodesInGroup(group, 1, options);
+               computeService.createNodesInGroup(group, 1, options);
          assertEquals(nodes.size(), 1, "One node should have been created");
 
          // Verify the disk on the instance is an ssd.
          NodeMetadata node = Iterables.get(nodes, 0);
-         GoogleComputeEngineApi api = client.getContext().unwrapApi(GoogleComputeEngineApi.class);
+         GoogleComputeEngineApi api = computeService.getContext().unwrapApi(GoogleComputeEngineApi.class);
          Instance instance = api.instancesInZone(node.getLocation().getId()).get(node.getName());
          Disk disk = api.disksInZone(node.getLocation().getId()).get(toName(instance.disks().get(0).source()));
          assertTrue(disk.type().toString().endsWith("pd-ssd"));
          assertTrue(instance.scheduling().preemptible());
 
       } finally {
-         client.destroyNodesMatching(NodePredicates.inGroup(group));
+         computeService.destroyNodesMatching(NodePredicates.inGroup(group));
       }
    }
    /**

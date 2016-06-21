@@ -650,7 +650,7 @@ public abstract class BaseComputeServiceLiveTest extends BaseComputeServiceConte
       Set<? extends NodeMetadata> destroyed = computeService.destroyNodesMatching(inGroup(group));
       assertEquals(toDestroy, destroyed.size());
       Uninterruptibles.sleepUninterruptibly(100, TimeUnit.SECONDS);
-      for (NodeMetadata node : filter(client.listNodesDetailsMatching(all()), inGroup(group))) {
+      for (NodeMetadata node : filter(computeService.listNodesDetailsMatching(all()), inGroup(group))) {
          assert node.getStatus() == Status.TERMINATED : node;
          assert view.utils().credentialStore().get("node#" + node.getId()) == null : "credential should have been null for "
                + "node#" + node.getId();

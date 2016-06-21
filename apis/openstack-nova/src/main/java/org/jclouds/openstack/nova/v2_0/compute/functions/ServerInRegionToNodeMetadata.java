@@ -126,13 +126,13 @@ public class ServerInRegionToNodeMetadata implements Function<ServerInRegion, No
 
       builder.publicAddresses(
                   transform(
-                          filter(addresses, not(isPrivateAddress)),
+                          filter(addresses, or(isFloatingAddress, not(isPrivateAddress))),
                           AddressToStringTransformationFunction.INSTANCE)
                   );
 
       builder.privateAddresses(
                   transform(
-                          filter(addresses, isPrivateAddress),
+                          filter(addresses, and(not(isFloatingAddress), isPrivateAddress)),
                           AddressToStringTransformationFunction.INSTANCE)
                   );
 
