@@ -49,8 +49,8 @@ public class ComputeServicePropertiesTest {
    public void testDefaultPollPeriod() {
 	   PollPeriod props = ContextBuilder.newBuilder("stub").buildInjector()
             .getInstance(PollPeriod.class);
-      assertEquals(props.pollInitialPeriod, 5000);
-      assertEquals(props.pollMaxPeriod, 30000);
+      assertEquals(props.pollInitialPeriod, 15000);
+      assertEquals(props.pollMaxPeriod, 60000);
    }
 
    public void testOverridePollPeriod() {
