@@ -27,8 +27,8 @@ import org.jclouds.apis.ApiMetadata;
 import org.jclouds.openstack.keystone.auth.config.AuthenticationModule;
 import org.jclouds.openstack.keystone.catalog.config.KeystoneAdminURLModule;
 import org.jclouds.openstack.keystone.catalog.config.ServiceCatalogModule;
-import org.jclouds.openstack.keystone.v2_0.config.KeystoneHttpApiModule;
-import org.jclouds.openstack.keystone.v2_0.config.KeystoneParserModule;
+import org.jclouds.openstack.keystone.v3.config.KeystoneHttpApiModule;
+import org.jclouds.openstack.keystone.v3.config.KeystoneParserModule;
 import org.jclouds.openstack.v2_0.ServiceType;
 import org.jclouds.rest.internal.BaseHttpApiMetadata;
 
@@ -59,7 +59,7 @@ public class KeystoneApiMetadata extends BaseHttpApiMetadata<KeystoneApi> {
       Properties properties = BaseHttpApiMetadata.defaultProperties();
       properties.setProperty(CREDENTIAL_TYPE, org.jclouds.openstack.keystone.auth.config.CredentialTypes.PASSWORD_CREDENTIALS);
       properties.setProperty(SERVICE_TYPE, ServiceType.IDENTITY);
-      properties.setProperty(KEYSTONE_VERSION, "2");
+      properties.setProperty(KEYSTONE_VERSION, "3");
       return properties;
    }
 

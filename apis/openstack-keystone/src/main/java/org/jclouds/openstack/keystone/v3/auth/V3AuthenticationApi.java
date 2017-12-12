@@ -45,14 +45,14 @@ public interface V3AuthenticationApi extends AuthenticationApi, Closeable {
 
    @Named("token:create")
    @POST
-   @ResponseParser(ParseTokenFromHttpResponse.class) //ParseToken.class)
+   @ResponseParser(ParseTokenFromHttpResponse.class)
    @MapBinder(BindPasswordAuthToJsonPayload.class)
    @Override
    Token authenticatePassword(TenantAndCredentials<PasswordCredentials> credentials);
 
    @Named("token:create")
    @POST
-   @ResponseParser(ParseTokenFromHttpResponse.class) //ParseToken.class)
+   @ResponseParser(ParseTokenFromHttpResponse.class)
    @MapBinder(BindTokenAuthToJsonPayload.class)
    @Override
    Token authenticateToken(TenantAndCredentials<TokenCredentials> credentials);

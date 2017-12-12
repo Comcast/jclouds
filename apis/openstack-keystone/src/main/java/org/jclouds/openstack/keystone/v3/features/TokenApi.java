@@ -20,11 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Named;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import org.jclouds.Fallbacks.EmptyListOnNotFoundOr404;
@@ -39,6 +35,7 @@ import org.jclouds.openstack.keystone.v3.domain.Region;
 import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.openstack.v2_0.services.Identity;
 import org.jclouds.rest.annotations.Fallback;
+import org.jclouds.rest.annotations.Headers;
 import org.jclouds.rest.annotations.RequestFilters;
 import org.jclouds.rest.annotations.SelectJson;
 
@@ -58,9 +55,10 @@ public interface TokenApi {
    @Named("token:get")
    @GET
    @SelectJson("token")
-   @Path("/auth/tokens/{token}")
+   @Path("/auth/tokens")
    @Fallback(NullOnNotFoundOr404.class)
    @Nullable
+   @Headers( keys = "X-Subject-Token", values = "{token}")
    Token get(@PathParam("token") String token);
 
    /**
