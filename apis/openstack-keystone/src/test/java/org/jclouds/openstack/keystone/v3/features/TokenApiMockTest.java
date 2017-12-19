@@ -54,7 +54,7 @@ public class TokenApiMockTest extends BaseV3KeystoneApiMockTest {
    }
    
    private Token tokenFromResource(String resource) {
-      return onlyObjectFromResource(resource, new TypeToken<Map<String, Token>>() {
+      return onlyObjectFromResource(resource, new TypeToken<Token>() {
          private static final long serialVersionUID = 1L;
       });
    }

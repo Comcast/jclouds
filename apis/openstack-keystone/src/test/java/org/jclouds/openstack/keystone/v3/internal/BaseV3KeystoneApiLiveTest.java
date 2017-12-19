@@ -18,11 +18,16 @@ package org.jclouds.openstack.keystone.v3.internal;
 
 import java.util.Properties;
 
+import com.google.common.collect.Iterables;
 import org.jclouds.apis.BaseApiLiveTest;
+import org.jclouds.http.HttpRequest;
+import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
 import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 
 public class BaseV3KeystoneApiLiveTest extends BaseApiLiveTest<KeystoneApi> {
+
+   protected String token;
 
    public BaseV3KeystoneApiLiveTest() {
       provider = "openstack-keystone-3";
@@ -31,9 +36,14 @@ public class BaseV3KeystoneApiLiveTest extends BaseApiLiveTest<KeystoneApi> {
    @Override
    protected Properties setupProperties() {
       Properties props = super.setupProperties();
-      props.setProperty("jclouds.api-version", "v3");
       setIfTestSystemPropertyPresent(props, KeystoneProperties.CREDENTIAL_TYPE);
       return props;
+   }
+
+   // Get the token currently in use
+   protected void grabToken(AuthenticateRequest ar) {
+      HttpRequest test = ar.filter(HttpRequest.builder().method("GET").endpoint(endpoint).build());
+      token = Iterables.getOnlyElement(test.getHeaders().get("X-Auth-Token"));
    }
 
 }

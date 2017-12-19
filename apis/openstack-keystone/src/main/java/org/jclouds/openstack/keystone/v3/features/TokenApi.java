@@ -20,7 +20,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Named;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 
 import org.jclouds.Fallbacks.EmptyListOnNotFoundOr404;
@@ -80,9 +84,10 @@ public interface TokenApi {
     *
     * @return true if the token is valid
     */
-   @Named("token:valid")
+   @Named("token:check")
    @HEAD
-   @Path("/auth/tokens/{token}")
+   @Path("/auth/tokens")
+   @Headers( keys = "X-Subject-Token", values = "{token}")
    @Fallback(FalseOnNotFoundOr404.class)
    boolean isValid(@PathParam("token") String token);
 

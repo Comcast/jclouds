@@ -16,10 +16,8 @@
  */
 package org.jclouds.openstack.keystone.v3.features;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import org.jclouds.http.HttpRequest;
 import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiLiveTest;
@@ -27,10 +25,11 @@ import org.testng.annotations.Test;
 
 import java.util.Properties;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 @Test(groups = "live", testName = "TokenApiLiveTest")
 public class TokenApiLiveTest extends BaseV3KeystoneApiLiveTest {
-
-   protected String token;
 
    @Override
    protected KeystoneApi create(Properties props, Iterable<Module> modules) {
@@ -39,14 +38,12 @@ public class TokenApiLiveTest extends BaseV3KeystoneApiLiveTest {
       return injector.getInstance(KeystoneApi.class);
    }
 
-   // Get the token currently in use
-   private void grabToken(AuthenticateRequest ar) {
-      HttpRequest test = ar.filter(HttpRequest.builder().method("GET").endpoint(endpoint).build());
-      token = Iterables.getOnlyElement(test.getHeaders().get("X-Auth-Token"));
+   public void testIsTokenValid() {
+      assertTrue(api().isValid(token));
    }
 
    public void testGetToken() {
-      System.out.println(api().get(token));
+      assertNotNull(api().get(token));
    }
 
    private TokenApi api() {

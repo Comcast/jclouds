@@ -108,7 +108,7 @@ public class BaseV3KeystoneApiMockTest {
       }
    }
    
-   protected <T> T onlyObjectFromResource(String resourceName, TypeToken<Map<String, T>> type) {
+   protected <T> T onlyObjectFromResource(String resourceName, TypeToken<T> type) {
       // Assume JSON objects passed here will be in the form: { "entity": { ... } }
       String text = stringFromResource(resourceName);
       Map<String, T> object = json.fromJson(text, type.getType());
