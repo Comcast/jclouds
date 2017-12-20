@@ -29,6 +29,7 @@ import org.jclouds.openstack.keystone.v3.domain.Auth.Identity;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Identity.PasswordAuth;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Identity.PasswordAuth.UserAuth;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Identity.PasswordAuth.UserAuth.DomainAuth;
+import org.jclouds.openstack.keystone.v3.domain.Auth.Scope;
 
 @Singleton
 public class BindPasswordAuthToJsonPayload extends BindAuthToJsonPayload<PasswordCredentials> {
@@ -39,12 +40,12 @@ public class BindPasswordAuthToJsonPayload extends BindAuthToJsonPayload<Passwor
    }
 
    @Override
-   protected Auth buildAuth(TenantAndCredentials<PasswordCredentials> credentials) {
-      return Auth.create(Identity.create(
-            singletonList("password"),
-            null,
-            PasswordAuth.create(UserAuth.create(credentials.credentials().username(),
-                  DomainAuth.create(credentials.tenantName()), credentials.credentials().password()))));
+   protected Auth buildAuth(TenantAndCredentials<PasswordCredentials> credentials, Scope scope) {
+      PasswordCredentials creds = credentials.credentials();
+      DomainAuth domain = DomainAuth.create(credentials.tenantName());
+      UserAuth user = UserAuth.create(creds.username(), domain, creds.password());
+
+      return Auth.create(Identity.create(singletonList("password"), null, PasswordAuth.create(user)), scope);
    }
 
 }

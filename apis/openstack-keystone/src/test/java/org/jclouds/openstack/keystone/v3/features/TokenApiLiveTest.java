@@ -16,17 +16,18 @@
  */
 package org.jclouds.openstack.keystone.v3.features;
 
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Properties;
+
 import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiLiveTest;
 import org.testng.annotations.Test;
 
-import java.util.Properties;
-
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 
 @Test(groups = "live", testName = "TokenApiLiveTest")
 public class TokenApiLiveTest extends BaseV3KeystoneApiLiveTest {
@@ -46,7 +47,7 @@ public class TokenApiLiveTest extends BaseV3KeystoneApiLiveTest {
       assertNotNull(api().get(token));
    }
 
-   private TokenApi api() {
-      return api.getTokenApi();
+   private AuthApi api() {
+      return api.getAuthApi();
    }
 }

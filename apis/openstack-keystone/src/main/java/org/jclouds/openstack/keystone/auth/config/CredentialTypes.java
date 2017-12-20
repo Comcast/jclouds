@@ -44,12 +44,10 @@ public class CredentialTypes {
 
    public static <T> Map<String, T> indexByCredentialType(Iterable<T> iterable) {
       return Maps.uniqueIndex(iterable, new Function<T, String>() {
-
          @Override
          public String apply(T input) {
             return credentialTypeOf(input);
          }
-
       });
    }
 

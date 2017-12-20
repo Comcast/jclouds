@@ -35,7 +35,7 @@ public class ParseTokenFromHttpResponse implements Function<HttpResponse, Token>
    private final ParseFirstJsonValueNamed<Token> parser;
 
    @Inject
-   public ParseTokenFromHttpResponse(GsonWrapper gsonView) {
+   ParseTokenFromHttpResponse(GsonWrapper gsonView) {
       this.parser = new ParseFirstJsonValueNamed<Token>(gsonView, TypeLiteral.get(Token.class), "token");
    }
 

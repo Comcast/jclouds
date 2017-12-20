@@ -18,7 +18,10 @@ package org.jclouds.openstack.keystone.v3;
 
 import java.io.Closeable;
 
-import org.jclouds.openstack.keystone.v3.features.TokenApi;
+import org.jclouds.openstack.keystone.v3.features.AuthApi;
+import org.jclouds.openstack.keystone.v3.features.CatalogApi;
+import org.jclouds.openstack.keystone.v3.features.ProjectApi;
+import org.jclouds.openstack.keystone.v3.features.RegionApi;
 import org.jclouds.rest.annotations.Delegate;
 
 /**
@@ -27,9 +30,26 @@ import org.jclouds.rest.annotations.Delegate;
 public interface KeystoneApi extends Closeable {
 
    /**
-    * Provides access to Token features
+    * Provides access to authentication and token management features.
     */
    @Delegate
-   TokenApi getTokenApi();
+   AuthApi getAuthApi();
 
+   /**
+    * Provides access to service catalog features.
+    */
+   @Delegate
+   CatalogApi getCatalogApi();
+   
+   /**
+    * Provides access to region features.
+    */
+   @Delegate
+   RegionApi getRegionApi();
+   
+   /**
+    * Provides access to project features.
+    */
+   @Delegate
+   ProjectApi getProjectApi();
 }

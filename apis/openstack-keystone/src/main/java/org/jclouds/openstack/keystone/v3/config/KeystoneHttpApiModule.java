@@ -16,15 +16,11 @@
  */
 package org.jclouds.openstack.keystone.v3.config;
 
-import java.net.URI;
-
-import org.jclouds.openstack.keystone.v2_0.config.NamespaceAliases;
+import org.jclouds.json.config.GsonModule;
+import org.jclouds.json.config.GsonModule.DateAdapter;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.rest.ConfiguresHttpApi;
 import org.jclouds.rest.config.HttpApiModule;
-
-import com.google.inject.Binder;
-import com.google.inject.multibindings.MapBinder;
 
 /**
  * Configures the Keystone API.
@@ -32,18 +28,10 @@ import com.google.inject.multibindings.MapBinder;
 @ConfiguresHttpApi
 public class KeystoneHttpApiModule extends HttpApiModule<KeystoneApi> {
 
-   public KeystoneHttpApiModule() {
-   }
-
-   // Allow providers to cleanly contribute their own aliases
-   public static MapBinder<URI, URI> namespaceAliasBinder(Binder binder) {
-      return MapBinder.newMapBinder(binder, URI.class, URI.class, NamespaceAliases.class).permitDuplicates();
-   }
-
    @Override
    protected void configure() {
       super.configure();
-      namespaceAliasBinder(binder());
+      bind(DateAdapter.class).to(GsonModule.Iso8601DateAdapter.class);
    }
 
 }

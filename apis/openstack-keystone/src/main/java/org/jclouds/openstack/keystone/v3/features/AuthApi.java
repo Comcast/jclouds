@@ -16,9 +16,6 @@
  */
 package org.jclouds.openstack.keystone.v3.features;
 
-import java.util.List;
-import java.util.Set;
-
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -27,53 +24,47 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 
-import org.jclouds.Fallbacks.EmptyListOnNotFoundOr404;
-import org.jclouds.Fallbacks.EmptySetOnNotFoundOr404;
 import org.jclouds.Fallbacks.FalseOnNotFoundOr404;
 import org.jclouds.Fallbacks.NullOnNotFoundOr404;
 import org.jclouds.javax.annotation.Nullable;
 import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
-import org.jclouds.openstack.keystone.v2_0.domain.Endpoint;
-import org.jclouds.openstack.keystone.v2_0.domain.User;
-import org.jclouds.openstack.keystone.v3.domain.Region;
 import org.jclouds.openstack.keystone.v3.domain.Token;
+import org.jclouds.openstack.keystone.v3.domain.User;
 import org.jclouds.openstack.v2_0.services.Identity;
+import org.jclouds.rest.annotations.Endpoint;
 import org.jclouds.rest.annotations.Fallback;
 import org.jclouds.rest.annotations.Headers;
 import org.jclouds.rest.annotations.RequestFilters;
 import org.jclouds.rest.annotations.SelectJson;
 
 /**
- * Provides access to the Keystone Admin API.
+ * Provides access to the Keystone Authentication API.
  */
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestFilters(AuthenticateRequest.class)
-@org.jclouds.rest.annotations.Endpoint(Identity.class)
-public interface TokenApi {
+@Endpoint(Identity.class)
+@Path("/auth")
+public interface AuthApi {
 
    /**
-    * Validate a token and, if it is valid, return access information regarding the tenant (though not the service catalog)/
-    *
-    * @return the requested information
+    * Validate a token and, if it is valid, return access information regarding the tenant (though not the service catalog).
     */
    @Named("token:get")
    @GET
    @SelectJson("token")
-   @Path("/auth/tokens")
+   @Path("/tokens")
    @Fallback(NullOnNotFoundOr404.class)
    @Nullable
-   @Headers( keys = "X-Subject-Token", values = "{token}")
+   @Headers(keys = "X-Subject-Token", values = "{token}")
    Token get(@PathParam("token") String token);
 
    /**
-    * Validate a token and, if it is valid, return access information regarding the tenant (though not the service catalog)/
-    *
-    * @return the requested information
+    * Validate a token and, if it is valid, return access information regarding the tenant (though not the service catalog).
     */
    @Named("token:getuser")
    @GET
    @SelectJson("user")
-   @Path("/auth/tokens/{token}")
+   @Path("/tokens/{token}")
    @Fallback(NullOnNotFoundOr404.class)
    @Nullable
    User getUserOfToken(@PathParam("token") String token);
@@ -81,55 +72,12 @@ public interface TokenApi {
    /**
     * Validate a token. This is a high-performance variant of the #getToken() call that does not return any further
     * information.
-    *
-    * @return true if the token is valid
     */
    @Named("token:check")
    @HEAD
-   @Path("/auth/tokens")
+   @Path("/tokens")
    @Headers( keys = "X-Subject-Token", values = "{token}")
    @Fallback(FalseOnNotFoundOr404.class)
    boolean isValid(@PathParam("token") String token);
 
-   /**
-    * List all endpoints for a token
-    * <p/>
-    * NOTE: currently not working in openstack ( https://bugs.launchpad.net/keystone/+bug/988672 )
-    *
-    * @return the set of endpoints
-    */
-   @Named("token:listEndpoints")
-   @GET
-   @SelectJson("endpoints")
-   @Path("/{token}/endpoints")
-   @Fallback(EmptySetOnNotFoundOr404.class)
-   Set<Endpoint> listEndpointsForToken(@PathParam("token") String token);
-
-
-   /**
-    * List all endpoints for a token
-    * <p/>
-    * NOTE: currently not working in openstack ( https://bugs.launchpad.net/keystone/+bug/988672 )
-    *
-    * @return the list of endpoints
-    */
-   @Named("token:endpoints")
-   @GET
-   @SelectJson("endpoints")
-   @Path("/endpoints")
-   @Fallback(EmptyListOnNotFoundOr404.class)
-   List<Endpoint> endpoints();
-
-   /**
-    * List all regions for a token
-    * <p/>
-    *
-    * @return the list of regions
-    */
-   @Named("token:regions")
-   @GET
-   @SelectJson("regions")
-   @Path("/regions")
-   @Fallback(EmptyListOnNotFoundOr404.class)
-   List<Region> regions();
 }

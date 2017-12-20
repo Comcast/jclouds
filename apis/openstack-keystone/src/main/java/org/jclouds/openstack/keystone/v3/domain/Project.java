@@ -16,42 +16,35 @@
  */
 package org.jclouds.openstack.keystone.v3.domain;
 
-import java.util.Date;
+import java.util.List;
 
 import org.jclouds.javax.annotation.Nullable;
 import org.jclouds.json.SerializedNames;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 
 @AutoValue
-public abstract class User {
+public abstract class Project {
 
-   @AutoValue
-   public abstract static class Domain {
-
-      public abstract String id();
-      public abstract String name();
-
-      @SerializedNames({ "id", "name" })
-      public static Domain create(String id, String name) {
-         return new AutoValue_User_Domain(id, name);
-      }
-   }
-
+   public abstract boolean isDomain();
+   @Nullable public abstract String description();
+   public abstract String domainId();
+   @Nullable public abstract String domainName();
+   public abstract boolean enabled();
    public abstract String id();
    public abstract String name();
-   @Nullable public abstract Date passwordExpiresAt();
-   @Nullable public abstract Domain domain();
-   @Nullable public abstract String domainId();
-   @Nullable public abstract String defaultProjectId();
-   @Nullable public abstract Boolean enabled();
+   @Nullable public abstract String parentId();
+   @Nullable public abstract List<String> tags();
 
-   @SerializedNames({ "id", "name", "password_expires_at", "domain", "domain_id", "default_project_id", "enabled" })
-   public static User create(String id, String name, Date passwordExpiresAt, Domain domain, String domainId,
-         String defaultProjectId, Boolean enabled) {
-      return new AutoValue_User(id, name, passwordExpiresAt, domain, domainId, defaultProjectId, enabled);
+   @SerializedNames({ "is_domain", "description", "domain_id", "domain_name", "enabled", "id", "name", "parent_id",
+         "tags" })
+   public static Project create(boolean isDomain, String description, String domainId, String domainName,
+         boolean enabled, String id, String name, String parentId, List<String> tags) {
+      return new AutoValue_Project(isDomain, description, domainId, domainName, enabled, id, name, parentId,
+            tags == null ? null : ImmutableList.copyOf(tags));
    }
 
-   User() {
+   Project() {
    }
 }

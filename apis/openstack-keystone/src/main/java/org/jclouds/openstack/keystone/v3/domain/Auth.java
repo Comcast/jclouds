@@ -25,40 +25,37 @@ import com.google.auto.value.AutoValue;
 
 @AutoValue
 public abstract class Auth {
-   
    public abstract Identity identity();
+   @Nullable public abstract Scope scope();
 
-   @SerializedNames({ "identity" })
-   public static Auth create(Identity identity) {
-      return new AutoValue_Auth(identity);
+   @SerializedNames({ "identity", "scope" })
+   public static Auth create(Identity identity, Scope scope) {
+      return new AutoValue_Auth(identity, scope);
+   }
+   
+   @AutoValue
+   public abstract static class Id {
+      public abstract String id();
+
+      @SerializedNames({ "id" })
+      public static Id create(String id) {
+         return new AutoValue_Auth_Id(id);
+      }
    }
 
    @AutoValue
    public abstract static class Identity {
-      
       public abstract List<String> methods();
-      @Nullable public abstract TokenAuth token();
+      @Nullable public abstract Id token();
       @Nullable public abstract PasswordAuth password();
 
       @SerializedNames({ "methods", "token", "password" })
-      public static Identity create(List<String> methods, TokenAuth token, PasswordAuth password) {
+      public static Identity create(List<String> methods, Id token, PasswordAuth password) {
          return new AutoValue_Auth_Identity(methods, token, password);
       }
 
       @AutoValue
-      public abstract static  class TokenAuth {
-         
-         public abstract String id();
-
-         @SerializedNames({ "id" })
-         public static TokenAuth create(String id) {
-            return new AutoValue_Auth_Identity_TokenAuth(id);
-         }
-      }
-
-      @AutoValue
-      public abstract static  class PasswordAuth {
-         
+      public abstract static class PasswordAuth {
          public abstract UserAuth user();
 
          @SerializedNames({ "user" })
@@ -67,8 +64,7 @@ public abstract class Auth {
          }
 
          @AutoValue
-         public abstract static  class UserAuth {
-            
+         public abstract static class UserAuth {
             public abstract String name();
             public abstract DomainAuth domain();
             public abstract String password();
@@ -79,8 +75,7 @@ public abstract class Auth {
             }
 
             @AutoValue
-            public abstract static  class DomainAuth {
-               
+            public abstract static class DomainAuth {
                @Nullable public abstract String name();
 
                @SerializedNames({ "name" })
@@ -89,6 +84,16 @@ public abstract class Auth {
                }
             }
          }
+      }
+   }
+
+   @AutoValue
+   public abstract static class Scope {
+      public abstract Id project();
+
+      @SerializedNames({ "project" })
+      public static Scope create(Id id) {
+         return new AutoValue_Auth_Scope(id);
       }
    }
 }

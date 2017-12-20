@@ -27,6 +27,8 @@ import org.jclouds.http.HttpRequest;
 import org.jclouds.json.Json;
 import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
 import org.jclouds.openstack.keystone.v3.domain.Auth;
+import org.jclouds.openstack.keystone.v3.domain.Auth.Id;
+import org.jclouds.openstack.keystone.v3.domain.Auth.Scope;
 import org.jclouds.rest.MapBinder;
 import org.jclouds.rest.binders.BindToJsonPayload;
 import org.jclouds.rest.internal.GeneratedHttpRequest;
@@ -40,7 +42,7 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
       super(jsonBinder);
    }
 
-   protected abstract Auth buildAuth(TenantAndCredentials<T> credentials);
+   protected abstract Auth buildAuth(TenantAndCredentials<T> credentials, Scope scope);
 
    @Override
    public <R extends HttpRequest> R bindToRequest(R request, Map<String, Object> postParams) {
@@ -53,7 +55,9 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
       checkArgument(authentication.isPresent(), "no credentials found in the api call arguments");
 
       @SuppressWarnings("unchecked")
-      Auth auth = buildAuth((TenantAndCredentials<T>) authentication.get());
+      TenantAndCredentials<T> credentials = (TenantAndCredentials<T>) authentication.get();
+      Scope scope = credentials.projectId() == null ? null : Scope.create(Id.create(credentials.projectId()));
+      Auth auth = buildAuth(credentials, scope);
 
       R authRequest = super.bindToRequest(request, ImmutableMap.of("auth", auth));
       authRequest.getPayload().setSensitive(true);

@@ -16,7 +16,8 @@
  */
 package org.jclouds.openstack.keystone.v3.features;
 
-import java.util.Map;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiMockTest;
@@ -24,16 +25,13 @@ import org.testng.annotations.Test;
 
 import com.google.common.reflect.TypeToken;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
 @Test(groups = "unit", testName = "TokenApiMockTest", singleThreaded = true)
 public class TokenApiMockTest extends BaseV3KeystoneApiMockTest {
 
    public void testGetToken() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json").addHeader("X-Subject-Token", "bf583aefb74e45108346b4c1c8527a10"));
 
-      Token token = api.getTokenApi().get("bf583aefb74e45108346b4c1c8527a10");
+      Token token = api.getAuthApi().get("bf583aefb74e45108346b4c1c8527a10");
 
       assertEquals(token, tokenFromResource("/v3/token.json"));
 
@@ -44,7 +42,7 @@ public class TokenApiMockTest extends BaseV3KeystoneApiMockTest {
    public void testGetTokenReturns404() throws InterruptedException {
       server.enqueue(response404());
 
-      Token token = api.getTokenApi().get("bf583aefb74e45108346b4c1c8527a10");
+      Token token = api.getAuthApi().get("bf583aefb74e45108346b4c1c8527a10");
 
       assertNull(token);
 

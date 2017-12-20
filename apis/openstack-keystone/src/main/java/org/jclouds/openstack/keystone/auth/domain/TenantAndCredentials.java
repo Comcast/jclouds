@@ -29,6 +29,7 @@ public abstract class TenantAndCredentials<T> {
 
    @Nullable public abstract String tenantId();
    @Nullable public abstract String tenantName();
+   @Nullable public abstract String projectId();
    public abstract T credentials();
 
    TenantAndCredentials() {
@@ -43,6 +44,7 @@ public abstract class TenantAndCredentials<T> {
    public abstract static class Builder<T> {
       public abstract Builder<T> tenantId(String tenantId);
       public abstract Builder<T> tenantName(String tenantName);
+      public abstract Builder<T> projectId(String projectId);
       public abstract Builder<T> credentials(T credentials);
 
       public abstract TenantAndCredentials<T> build();

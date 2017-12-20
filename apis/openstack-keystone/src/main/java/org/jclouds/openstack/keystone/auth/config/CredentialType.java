@@ -32,7 +32,6 @@ import javax.inject.Qualifier;
 public @interface CredentialType {
    /**
     * @see CredentialTypes
-    * 
     */
    String value();
 }

@@ -25,8 +25,9 @@ import org.jclouds.json.Json;
 import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 import org.jclouds.openstack.keystone.v3.domain.Auth;
+import org.jclouds.openstack.keystone.v3.domain.Auth.Id;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Identity;
-import org.jclouds.openstack.keystone.v3.domain.Auth.Identity.TokenAuth;
+import org.jclouds.openstack.keystone.v3.domain.Auth.Scope;
 
 @Singleton
 public class BindTokenAuthToJsonPayload extends BindAuthToJsonPayload<TokenCredentials> {
@@ -37,9 +38,9 @@ public class BindTokenAuthToJsonPayload extends BindAuthToJsonPayload<TokenCrede
    }
 
    @Override
-   protected Auth buildAuth(TenantAndCredentials<TokenCredentials> credentials) {
-      return Auth
-            .create(Identity.create(singletonList("token"), TokenAuth.create(credentials.credentials().id()), null));
+   protected Auth buildAuth(TenantAndCredentials<TokenCredentials> credentials, Scope scope) {
+      Id token = Id.create(credentials.credentials().id());
+      return Auth.create(Identity.create(singletonList("token"), token, null), scope);
    }
 
 }

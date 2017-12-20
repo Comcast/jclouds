@@ -28,7 +28,6 @@ import org.jclouds.openstack.keystone.auth.config.AuthenticationModule;
 import org.jclouds.openstack.keystone.catalog.config.KeystoneAdminURLModule;
 import org.jclouds.openstack.keystone.catalog.config.ServiceCatalogModule;
 import org.jclouds.openstack.keystone.v3.config.KeystoneHttpApiModule;
-import org.jclouds.openstack.keystone.v3.config.KeystoneParserModule;
 import org.jclouds.openstack.v2_0.ServiceType;
 import org.jclouds.rest.internal.BaseHttpApiMetadata;
 
@@ -79,8 +78,8 @@ public class KeystoneApiMetadata extends BaseHttpApiMetadata<KeystoneApi> {
                                      .add(AuthenticationModule.class)
                                      .add(ServiceCatalogModule.class)
                                      .add(KeystoneAdminURLModule.class)
-                                     .add(KeystoneParserModule.class)
-                                     .add(KeystoneHttpApiModule.class).build());
+                                     .add(KeystoneHttpApiModule.class)
+                                     .build());
       }
 
       @Override

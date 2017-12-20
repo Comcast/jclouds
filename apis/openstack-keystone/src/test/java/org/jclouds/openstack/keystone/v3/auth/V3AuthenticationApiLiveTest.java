@@ -46,6 +46,7 @@ public class V3AuthenticationApiLiveTest extends BaseV3KeystoneApiLiveTest {
       user = Iterables.get(Splitter.on(":").split(identity), 1);
       context = newBuilder().modules(setupModules()).overrides(setupProperties())
             .build(new TypeToken<ApiContext<KeystoneApi>>() {
+               private static final long serialVersionUID = 1L;
             });
 
       grabToken(context.utils().injector().getInstance(AuthenticateRequest.class));

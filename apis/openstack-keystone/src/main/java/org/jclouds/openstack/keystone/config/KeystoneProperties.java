@@ -17,6 +17,7 @@
 package org.jclouds.openstack.keystone.config;
 
 import org.jclouds.openstack.keystone.auth.config.CredentialTypes;
+import org.jclouds.rest.annotations.SinceApiVersion;
 
 /**
  * Configuration properties and constants used in Keystone connections.
@@ -64,6 +65,22 @@ public final class KeystoneProperties {
     * @see <a href="http://wiki.openstack.org/CLIAuth">openstack docs</a>
     */
    public static final String REQUIRES_TENANT = "jclouds.keystone.requires-tenant";
+   
+   /**
+    * set this property to specify the authentication must be scoped to the project.
+    *
+    * @see <a href="http://wiki.openstack.org/CLIAuth">openstack docs</a>
+    */
+   @SinceApiVersion("3")
+   public static final String SCOPED_AUTH = "jclouds.keystone.scoped-auth";
+   
+   /**
+    * set this property to specify project id to sue for scoped authentication.
+    * <p>
+    * if not present, jclouds will automatically scope the authentication to the current user's project
+    */
+   @SinceApiVersion("3")
+   public static final String PROJECT_ID = "jclouds.keystone.project-id";
 
    /**
     * type of the keystone service. ex. {@code compute}
