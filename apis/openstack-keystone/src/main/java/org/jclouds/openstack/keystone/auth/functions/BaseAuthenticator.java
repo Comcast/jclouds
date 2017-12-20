@@ -17,8 +17,8 @@
 package org.jclouds.openstack.keystone.auth.functions;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.jclouds.openstack.keystone.config.KeystoneProperties.PROJECT_ID;
 import static org.jclouds.openstack.keystone.config.KeystoneProperties.REQUIRES_TENANT;
+import static org.jclouds.openstack.keystone.config.KeystoneProperties.SCOPE;
 import static org.jclouds.openstack.keystone.config.KeystoneProperties.TENANT_ID;
 import static org.jclouds.openstack.keystone.config.KeystoneProperties.TENANT_NAME;
 
@@ -52,8 +52,8 @@ public abstract class BaseAuthenticator<C> implements Function<Credentials, Auth
    protected boolean requiresTenant;
    
    @Inject(optional = true)
-   @Named(PROJECT_ID)
-   protected String projectId;
+   @Named(SCOPE)
+   protected String scope;
 
    @PostConstruct
    public void checkPropertiesAreCompatible() {
@@ -81,7 +81,7 @@ public abstract class BaseAuthenticator<C> implements Function<Credentials, Auth
       
       C creds = createCredentials(usernameOrAccessKey, passwordOrSecretKeyOrToken);
       TenantAndCredentials<C> credsWithTenant = TenantAndCredentials.<C> builder().tenantId(defaultTenantId)
-            .tenantName(tenantName).projectId(projectId).credentials(creds).build();
+            .tenantName(tenantName).scope(scope).credentials(creds).build();
       
       return authenticate(credsWithTenant);
    }

@@ -67,20 +67,18 @@ public final class KeystoneProperties {
    public static final String REQUIRES_TENANT = "jclouds.keystone.requires-tenant";
    
    /**
-    * set this property to specify the authentication must be scoped to the project.
-    *
-    * @see <a href="http://wiki.openstack.org/CLIAuth">openstack docs</a>
-    */
-   @SinceApiVersion("3")
-   public static final String SCOPED_AUTH = "jclouds.keystone.scoped-auth";
-   
-   /**
-    * set this property to specify project id to sue for scoped authentication.
+    * set this property to specify for scoped authentication.
     * <p>
-    * if not present, jclouds will automatically scope the authentication to the current user's project
+    * The format is one of the following:
+    * <ul>
+    * <li>project:<project-id></li>
+    * <li>domain:<domain-name></li>
+    * <li></li>
+    * </ul>
+    * For example: <code>project:457841231597451534</code>
     */
    @SinceApiVersion("3")
-   public static final String PROJECT_ID = "jclouds.keystone.project-id";
+   public static final String SCOPE = "jclouds.keystone.scope";
 
    /**
     * type of the keystone service. ex. {@code compute}

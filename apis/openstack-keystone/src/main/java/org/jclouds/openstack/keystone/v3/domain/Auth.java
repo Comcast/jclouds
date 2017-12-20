@@ -34,16 +34,6 @@ public abstract class Auth {
    }
    
    @AutoValue
-   public abstract static class Id {
-      public abstract String id();
-
-      @SerializedNames({ "id" })
-      public static Id create(String id) {
-         return new AutoValue_Auth_Id(id);
-      }
-   }
-
-   @AutoValue
    public abstract static class Identity {
       public abstract List<String> methods();
       @Nullable public abstract Id token();
@@ -86,14 +76,49 @@ public abstract class Auth {
          }
       }
    }
+   
+   @AutoValue
+   public abstract static class Id {
+      public abstract String id();
+
+      @SerializedNames({ "id" })
+      public static Id create(String id) {
+         return new AutoValue_Auth_Id(id);
+      }
+   }
+   
+   @AutoValue
+   public abstract static class Domain {
+      @Nullable public abstract String name();
+
+      @SerializedNames({ "name" })
+      public static Domain create(String name) {
+         return new AutoValue_Auth_Domain(name);
+      }
+   }
+   
+   public static interface Scope {
+      public static final String PROJECT = "project";
+      public static final String DOMAIN = "domain";
+   }
 
    @AutoValue
-   public abstract static class Scope {
+   public abstract static class ProjectScope implements Scope {
       public abstract Id project();
 
       @SerializedNames({ "project" })
-      public static Scope create(Id id) {
-         return new AutoValue_Auth_Scope(id);
+      public static ProjectScope create(Id id) {
+         return new AutoValue_Auth_ProjectScope(id);
+      }
+   }
+   
+   @AutoValue
+   public abstract static class DomainScope implements Scope {
+      public abstract Domain domain();
+
+      @SerializedNames({ "domain" })
+      public static DomainScope create(Domain domain) {
+         return new AutoValue_Auth_DomainScope(domain);
       }
    }
 }
