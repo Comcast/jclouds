@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.inject.Singleton;
 
-import com.google.common.collect.Iterables;
 import org.jclouds.http.HttpResponse;
 import org.jclouds.http.functions.ParseFirstJsonValueNamed;
 import org.jclouds.json.internal.GsonWrapper;
@@ -43,7 +42,7 @@ public class ParseTokenFromHttpResponse implements Function<HttpResponse, Token>
       checkNotNull(response, "response");
       Token toParse = parser.apply(response);
       checkNotNull(toParse, "parsed result from %s", response);
-      String xSubjectToken = Iterables.getOnlyElement(response.getHeaders().get("X-Subject-Token"));
+      String xSubjectToken = response.getFirstHeaderOrNull("X-Subject-Token");
       return toParse.toBuilder().id(xSubjectToken).build();
    }
 
