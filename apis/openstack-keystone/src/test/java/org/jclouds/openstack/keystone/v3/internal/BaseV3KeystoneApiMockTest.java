@@ -29,8 +29,11 @@ import java.util.Set;
 import org.jclouds.ContextBuilder;
 import org.jclouds.concurrent.config.ExecutorServiceModule;
 import org.jclouds.json.Json;
+import org.jclouds.openstack.keystone.auth.AuthenticationApi;
+import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.openstack.keystone.v3.KeystoneApiMetadata;
+import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.rest.ApiContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -54,6 +57,7 @@ public class BaseV3KeystoneApiMockTest {
    
    protected MockWebServer server;
    protected KeystoneApi api;
+   protected AuthenticationApi authenticationApi;
    private Json json;
    
    // So that we can ignore formatting.
@@ -70,6 +74,7 @@ public class BaseV3KeystoneApiMockTest {
               .overrides(overrides())
               .build();
       json = ctx.utils().injector().getInstance(Json.class);
+      authenticationApi = ctx.utils().injector().getInstance(AuthenticationApi.class);
       api = ctx.getApi();
    }
 
@@ -108,7 +113,7 @@ public class BaseV3KeystoneApiMockTest {
       }
    }
    
-   protected <T> T onlyObjectFromResource(String resourceName, TypeToken<T> type) {
+   protected <T> T onlyObjectFromResource(String resourceName, TypeToken<Map<String, T>> type) {
       // Assume JSON objects passed here will be in the form: { "entity": { ... } }
       String text = stringFromResource(resourceName);
       Map<String, T> object = json.fromJson(text, type.getType());
@@ -116,7 +121,7 @@ public class BaseV3KeystoneApiMockTest {
       checkArgument(object.keySet().size() == 1, "The given json does not contain more than one object: %s", text);
       return object.get(getOnlyElement(object.keySet()));
    }
-   
+
    protected <T> T objectFromResource(String resourceName, Class<T> type) {
       String text = stringFromResource(resourceName);
       return json.fromJson(text, type);
@@ -127,7 +132,6 @@ public class BaseV3KeystoneApiMockTest {
       assertEquals(request.getMethod(), method);
       assertEquals(request.getPath(), path);
       assertEquals(request.getHeader("Accept"), "application/json");
-      assertEquals(request.getHeader("Authorization"), "X-Token " + "token");
       return request;
    }
 
@@ -137,5 +141,11 @@ public class BaseV3KeystoneApiMockTest {
       assertEquals(request.getHeader("Content-Type"), "application/json");
       assertEquals(parser.parse(new String(request.getBody(), Charsets.UTF_8)), parser.parse(json));
       return request;
+   }
+
+   protected Token tokenFromResource(String resource) {
+      return onlyObjectFromResource(resource, new TypeToken<Map<String, Token>>() {
+         private static final long serialVersionUID = 1L;
+      });
    }
 }

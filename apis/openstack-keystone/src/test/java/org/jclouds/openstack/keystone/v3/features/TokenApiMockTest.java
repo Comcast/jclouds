@@ -51,9 +51,4 @@ public class TokenApiMockTest extends BaseV3KeystoneApiMockTest {
       assertSent(server, "GET", "/token/bf583aefb74e45108346b4c1c8527a10");
    }
    
-   private Token tokenFromResource(String resource) {
-      return onlyObjectFromResource(resource, new TypeToken<Token>() {
-         private static final long serialVersionUID = 1L;
-      });
-   }
 }
