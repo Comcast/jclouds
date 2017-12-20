@@ -30,9 +30,8 @@ import com.google.common.collect.ImmutableList;
 public abstract class Endpoint {
 
    public abstract String id();
-   public abstract String region();
-   public abstract String regionId();
-
+   @Nullable public abstract String region();
+   @Nullable public abstract String regionId();
    @Nullable public abstract String serviceId();
    public abstract URI url();
    @Nullable public abstract Boolean enabled();
