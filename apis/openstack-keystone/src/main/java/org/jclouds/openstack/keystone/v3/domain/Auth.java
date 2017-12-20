@@ -97,26 +97,26 @@ public abstract class Auth {
       }
    }
    
-   public static interface Scope {
+   public abstract static class Scope {
       public static final String PROJECT = "project";
       public static final String DOMAIN = "domain";
    }
 
    @AutoValue
-   public abstract static class ProjectScope implements Scope {
+   public abstract static class ProjectScope extends Scope {
       public abstract Id project();
 
-      @SerializedNames({ "project" })
+      @SerializedNames({ PROJECT })
       public static ProjectScope create(Id id) {
          return new AutoValue_Auth_ProjectScope(id);
       }
    }
    
    @AutoValue
-   public abstract static class DomainScope implements Scope {
+   public abstract static class DomainScope extends Scope {
       public abstract Domain domain();
 
-      @SerializedNames({ "domain" })
+      @SerializedNames({ DOMAIN })
       public static DomainScope create(Domain domain) {
          return new AutoValue_Auth_DomainScope(domain);
       }
