@@ -17,9 +17,12 @@
 package org.jclouds.openstack.keystone.v3.features;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import org.jclouds.openstack.keystone.v3.domain.Token;
+import org.jclouds.openstack.keystone.v3.domain.User;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiMockTest;
 import org.testng.annotations.Test;
 
@@ -55,4 +58,56 @@ public class AuthApiMockTest extends BaseV3KeystoneApiMockTest {
       assertEquals(request.getHeader("X-Subject-Token"), "foo");
    }
    
+   public void testIsValidToken() throws InterruptedException {
+      enqueueAuthentication(server);
+      server.enqueue(response204());
+
+      boolean valid = api.getAuthApi().isValid(authToken);
+      assertTrue(valid);
+
+      assertEquals(server.getRequestCount(), 2);
+      assertAuthentication(server);
+      RecordedRequest request = assertSent(server, "HEAD", "/auth/tokens");
+      assertEquals(request.getHeader("X-Subject-Token"), authToken);
+   }
+
+   public void testIsValidTokenReturns404() throws InterruptedException {
+      enqueueAuthentication(server);
+      server.enqueue(response404());
+
+      boolean valid = api.getAuthApi().isValid("foo");
+      assertFalse(valid);
+
+      assertEquals(server.getRequestCount(), 2);
+      assertAuthentication(server);
+      RecordedRequest request = assertSent(server, "HEAD", "/auth/tokens");
+      assertEquals(request.getHeader("X-Subject-Token"), "foo");
+   }
+   
+   public void testGetUserOfToken() throws InterruptedException {
+      enqueueAuthentication(server);
+      server.enqueue(jsonResponse("/v3/token.json"));
+
+      User user = api.getAuthApi().getUserOfToken(authToken);
+
+      assertEquals(user, tokenFromResource("/v3/token.json").user());
+
+      assertEquals(server.getRequestCount(), 2);
+      assertAuthentication(server);
+      RecordedRequest request = assertSent(server, "GET", "/auth/tokens");
+      assertEquals(request.getHeader("X-Subject-Token"), authToken);
+   }
+
+   public void testGetUserOfTokenReturns404() throws InterruptedException {
+      enqueueAuthentication(server);
+      server.enqueue(response404());
+
+      User user = api.getAuthApi().getUserOfToken("foo");
+      assertNull(user);
+
+      assertEquals(server.getRequestCount(), 2);
+      assertAuthentication(server);
+      RecordedRequest request = assertSent(server, "GET", "/auth/tokens");
+      assertEquals(request.getHeader("X-Subject-Token"), "foo");
+   }
 }

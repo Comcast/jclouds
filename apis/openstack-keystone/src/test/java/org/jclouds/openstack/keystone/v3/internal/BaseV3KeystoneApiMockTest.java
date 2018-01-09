@@ -145,10 +145,11 @@ public class BaseV3KeystoneApiMockTest {
    }
    
    protected void assertAuthentication(MockWebServer server) throws InterruptedException {
-      assertSent(server, "POST", "/auth/tokens", stringFromResource("/v3/auth-password-scoped.json"));
+      RecordedRequest request = assertSentNoAuth(server, "POST", "/auth/tokens");
+      assertBody(request, stringFromResource("/v3/auth-password-scoped.json"));
    }
-
-   protected RecordedRequest assertSent(MockWebServer server, String method, String path) throws InterruptedException {
+   
+   private RecordedRequest assertSentNoAuth(MockWebServer server, String method, String path) throws InterruptedException {
       RecordedRequest request = server.takeRequest();
       assertEquals(request.getMethod(), method);
       assertEquals(request.getPath(), path);
@@ -156,12 +157,22 @@ public class BaseV3KeystoneApiMockTest {
       return request;
    }
 
+   protected RecordedRequest assertSent(MockWebServer server, String method, String path) throws InterruptedException {
+      RecordedRequest request = assertSentNoAuth(server, method, path);
+      assertEquals(request.getHeader("X-Auth-Token"), authToken);
+      return request;
+   }
+
    protected RecordedRequest assertSent(MockWebServer server, String method, String path, String json)
          throws InterruptedException {
       RecordedRequest request = assertSent(server, method, path);
-      assertEquals(request.getHeader("Content-Type"), "application/json");
-      assertEquals(parser.parse(new String(request.getBody(), Charsets.UTF_8)), parser.parse(json));
+      assertBody(request, json);
       return request;
+   }
+   
+   private void assertBody(RecordedRequest request, String body) {
+      assertEquals(request.getHeader("Content-Type"), "application/json");
+      assertEquals(parser.parse(new String(request.getBody(), Charsets.UTF_8)), parser.parse(body));
    }
 
    protected Token tokenFromResource(String resource) {

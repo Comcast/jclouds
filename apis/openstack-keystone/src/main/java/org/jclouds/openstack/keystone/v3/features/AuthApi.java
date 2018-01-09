@@ -64,9 +64,10 @@ public interface AuthApi {
    @Named("token:getuser")
    @GET
    @SelectJson("user")
-   @Path("/tokens/{token}")
+   @Path("/tokens")
    @Fallback(NullOnNotFoundOr404.class)
    @Nullable
+   @Headers(keys = "X-Subject-Token", values = "{token}")
    User getUserOfToken(@PathParam("token") String token);
 
    /**
