@@ -25,8 +25,8 @@ import org.testng.annotations.Test;
 
 import com.google.common.reflect.TypeToken;
 
-@Test(groups = "unit", testName = "TokenApiMockTest", singleThreaded = true)
-public class TokenApiMockTest extends BaseV3KeystoneApiMockTest {
+@Test(groups = "unit", testName = "AuthApiMockTest", singleThreaded = true)
+public class AuthApiMockTest extends BaseV3KeystoneApiMockTest {
 
    public void testGetToken() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json").addHeader("X-Subject-Token", "bf583aefb74e45108346b4c1c8527a10"));

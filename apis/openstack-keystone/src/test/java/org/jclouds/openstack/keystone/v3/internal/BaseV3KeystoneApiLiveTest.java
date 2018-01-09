@@ -25,6 +25,8 @@ import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
 import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 
+import static org.jclouds.openstack.keystone.config.KeystoneProperties.SERVICE_TYPE;
+
 public class BaseV3KeystoneApiLiveTest extends BaseApiLiveTest<KeystoneApi> {
 
    protected String token;
@@ -37,6 +39,7 @@ public class BaseV3KeystoneApiLiveTest extends BaseApiLiveTest<KeystoneApi> {
    protected Properties setupProperties() {
       Properties props = super.setupProperties();
       setIfTestSystemPropertyPresent(props, KeystoneProperties.CREDENTIAL_TYPE);
+      props.setProperty(SERVICE_TYPE, "identityv3");
       return props;
    }
 

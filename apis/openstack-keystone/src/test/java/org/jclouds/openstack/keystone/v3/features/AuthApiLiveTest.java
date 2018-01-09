@@ -30,7 +30,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 @Test(groups = "live", testName = "TokenApiLiveTest")
-public class TokenApiLiveTest extends BaseV3KeystoneApiLiveTest {
+public class AuthApiLiveTest extends BaseV3KeystoneApiLiveTest {
 
    @Override
    protected KeystoneApi create(Properties props, Iterable<Module> modules) {
