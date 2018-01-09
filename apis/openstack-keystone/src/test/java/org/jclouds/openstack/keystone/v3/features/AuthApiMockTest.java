@@ -23,36 +23,32 @@ import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiMockTest;
 import org.testng.annotations.Test;
 
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
+import com.google.common.reflect.TypeToken;
 
 @Test(groups = "unit", testName = "AuthApiMockTest", singleThreaded = true)
 public class AuthApiMockTest extends BaseV3KeystoneApiMockTest {
 
    public void testGetToken() throws InterruptedException {
-      enqueueAuthentication(server);
-      server.enqueue(jsonResponse("/v3/token.json"));
+      server.enqueue(jsonResponse("/v3/token.json").addHeader("X-Subject-Token", "bf583aefb74e45108346b4c1c8527a10"));
 
-      Token token = api.getAuthApi().get(authToken);
+      Token token = api.getAuthApi().get("bf583aefb74e45108346b4c1c8527a10");
 
       assertEquals(token, tokenFromResource("/v3/token.json"));
 
-      assertEquals(server.getRequestCount(), 2);
-      assertAuthentication(server);
-      RecordedRequest request = assertSent(server, "GET", "/auth/tokens");
-      assertEquals(request.getHeader("X-Subject-Token"), authToken);
+      assertEquals(server.getRequestCount(), 1);
+      assertSent(server, "GET", "/token/bf583aefb74e45108346b4c1c8527a10");
    }
 
    public void testGetTokenReturns404() throws InterruptedException {
-      enqueueAuthentication(server);
       server.enqueue(response404());
 
-      Token token = api.getAuthApi().get("foo");
+      Token token = api.getAuthApi().get("bf583aefb74e45108346b4c1c8527a10");
+
       assertNull(token);
 
       assertEquals(server.getRequestCount(), 2);
-      assertAuthentication(server);
-      RecordedRequest request = assertSent(server, "GET", "/auth/tokens");
-      assertEquals(request.getHeader("X-Subject-Token"), "foo");
+      assertSent(server, "POST", "/auth/tokens");
+      assertSent(server, "GET", "/token/bf583aefb74e45108346b4c1c8527a10");
    }
    
 }

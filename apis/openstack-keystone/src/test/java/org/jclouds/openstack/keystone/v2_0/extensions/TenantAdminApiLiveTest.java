@@ -61,7 +61,7 @@ public class TenantAdminApiLiveTest extends BaseKeystoneApiLiveTest {
    protected void tearDown() {
       if (testTenant != null) {
          final String tenantId = testTenant.getId();
-         assertTrue(tenantAdminOption.get().delete(tenantId));
+         boolean success = tenantAdminOption.get().delete(tenantId);
          assertTrue(retry(new Predicate<TenantApi>() {
             public boolean apply(TenantApi tenantApi) {
                return tenantApi.get(tenantId) == null;

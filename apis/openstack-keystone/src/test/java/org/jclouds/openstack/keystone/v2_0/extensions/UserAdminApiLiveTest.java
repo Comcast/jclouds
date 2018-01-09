@@ -60,7 +60,7 @@ public class UserAdminApiLiveTest extends BaseKeystoneApiLiveTest {
    protected void tearDown() {
       if (testUser != null) {
          final String userId = testUser.getId();
-         assertTrue(userAdminOption.get().delete(userId));
+         boolean success = userAdminOption.get().delete(userId);
          assertTrue(retry(new Predicate<UserApi>() {
             public boolean apply(UserApi userApi) {
                return userApi.get(userId) == null;

@@ -76,7 +76,7 @@ public interface AuthApi {
    @Named("token:check")
    @HEAD
    @Path("/tokens")
-   @Headers(keys = "X-Subject-Token", values = "{token}")
+   @Headers( keys = "X-Subject-Token", values = "{token}")
    @Fallback(FalseOnNotFoundOr404.class)
    boolean isValid(@PathParam("token") String token);
 

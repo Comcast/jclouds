@@ -53,13 +53,8 @@ public class KeystoneAdminURLModule extends AbstractModule {
    @Identity
    protected final Supplier<URI> provideIdentityAdminUrl(final RegionIdToAdminURISupplier.Factory factory,
             @ApiVersion final String version, @Provider final Supplier<URI> providerURI) {
-      // There is a convention to use service types such as "identityv3" for specific endpoints. let's look first for
-      // those endpoints, and fallback to the default "identity" one or the project URL.
-      Supplier<URI> identityServiceForSpecificVersionInType = getLastValueInMap(factory.createForApiTypeAndVersion(
-            ServiceType.IDENTITY + "v" + version, version));
-      Supplier<URI> identityServiceForVersion = Suppliers2.onThrowable(identityServiceForSpecificVersionInType,
-            NoSuchElementException.class,
-            getLastValueInMap(factory.createForApiTypeAndVersion(ServiceType.IDENTITY, version)));
+      Supplier<URI> identityServiceForVersion = getLastValueInMap(factory.createForApiTypeAndVersion(
+               ServiceType.IDENTITY, version));
       Supplier<URI> whenIdentityServiceIsntListedFallbackToProviderURI = Suppliers2.onThrowable(
                identityServiceForVersion, NoSuchElementException.class, providerURI);
       Supplier<URI> whenIdentityServiceHasNoAdminURLFallbackToProviderURI = Suppliers2.or(

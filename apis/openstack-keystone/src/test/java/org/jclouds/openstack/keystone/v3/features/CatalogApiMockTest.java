@@ -18,38 +18,39 @@ package org.jclouds.openstack.keystone.v3.features;
 
 import static com.google.common.collect.Iterables.size;
 import static org.testng.Assert.assertEquals;
-
-import java.util.List;
+import static org.testng.Assert.assertNull;
 
 import org.jclouds.openstack.keystone.v3.domain.Endpoint;
+import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiMockTest;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 @Test(groups = "unit", testName = "CatalogApiMockTest", singleThreaded = true)
 public class CatalogApiMockTest extends BaseV3KeystoneApiMockTest {
 
    public void testListEndpoints() throws InterruptedException {
-      enqueueAuthentication(server);
       server.enqueue(jsonResponse("/v3/endpoints.json"));
 
       List<Endpoint> endpoints = api.getCatalogApi().endpoints();
+
       assertEquals(size(endpoints), 8);
-      
       assertEquals(server.getRequestCount(), 2);
-      assertAuthentication(server);
+
       assertSent(server, "GET", "/endpoints");
    }
 
-   public void testListEndpointsReturns404() throws InterruptedException {
-      enqueueAuthentication(server);
+   public void testGetTokenReturns404() throws InterruptedException {
       server.enqueue(response404());
 
-      List<Endpoint> endpoints = api.getCatalogApi().endpoints();
-      assertEquals(endpoints.size(), 0);
-      
+      Token token = api.getAuthApi().get("bf583aefb74e45108346b4c1c8527a10");
+
+      assertNull(token);
+
       assertEquals(server.getRequestCount(), 2);
-      assertAuthentication(server);
-      assertSent(server, "GET", "/endpoints");
+      assertSent(server, "POST", "/auth/tokens");
+      assertSent(server, "GET", "/token/bf583aefb74e45108346b4c1c8527a10");
    }
    
 }

@@ -16,49 +16,37 @@
  */
 package org.jclouds.openstack.keystone.v3.internal;
 
-import static org.jclouds.openstack.keystone.config.KeystoneProperties.CREDENTIAL_TYPE;
-import static org.jclouds.openstack.keystone.config.KeystoneProperties.SERVICE_TYPE;
-
 import java.util.Properties;
 
+import com.google.common.collect.Iterables;
 import org.jclouds.apis.BaseApiLiveTest;
-import org.jclouds.openstack.keystone.auth.AuthenticationApi;
-import org.jclouds.openstack.keystone.auth.config.Authentication;
+import org.jclouds.http.HttpRequest;
+import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
+import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
-import org.jclouds.rest.ApiContext;
 
-import com.google.common.base.Supplier;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
+import static org.jclouds.openstack.keystone.config.KeystoneProperties.SERVICE_TYPE;
 
 public class BaseV3KeystoneApiLiveTest extends BaseApiLiveTest<KeystoneApi> {
 
-   protected Supplier<String> token;
-   protected AuthenticationApi authenticationApi;
+   protected String token;
 
    public BaseV3KeystoneApiLiveTest() {
       provider = "openstack-keystone-3";
    }
 
    @Override
-   protected KeystoneApi create(Properties props, Iterable<Module> modules) {
-      ApiContext<KeystoneApi> ctx = newBuilder().modules(modules).overrides(props).build();
-      authenticationApi = ctx.utils().injector().getInstance(AuthenticationApi.class);
-      token = ctx.utils().injector().getInstance(Key.get(new TypeLiteral<Supplier<String>>() {
-      }, Authentication.class));
-      return ctx.getApi();
-   }
-
-   @Override
    protected Properties setupProperties() {
       Properties props = super.setupProperties();
-      setIfTestSystemPropertyPresent(props, CREDENTIAL_TYPE);
-      String customServiceType = setIfTestSystemPropertyPresent(props, SERVICE_TYPE);
-      if (customServiceType == null) {
-         props.setProperty(SERVICE_TYPE, "identityv3");
-      }
+      setIfTestSystemPropertyPresent(props, KeystoneProperties.CREDENTIAL_TYPE);
+      props.setProperty(SERVICE_TYPE, "identityv3");
       return props;
+   }
+
+   // Get the token currently in use
+   protected void grabToken(AuthenticateRequest ar) {
+      HttpRequest test = ar.filter(HttpRequest.builder().method("GET").endpoint(endpoint).build());
+      token = Iterables.getOnlyElement(test.getHeaders().get("X-Auth-Token"));
    }
 
 }

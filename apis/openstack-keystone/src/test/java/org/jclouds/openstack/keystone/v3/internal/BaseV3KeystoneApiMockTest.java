@@ -25,14 +25,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.concurrent.config.ExecutorServiceModule;
 import org.jclouds.json.Json;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.keystone.auth.AuthenticationApi;
-import org.jclouds.openstack.keystone.config.KeystoneProperties;
+import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
 import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.openstack.keystone.v3.KeystoneApiMetadata;
 import org.jclouds.openstack.keystone.v3.domain.Token;
@@ -55,10 +53,11 @@ public class BaseV3KeystoneApiMockTest {
    
    private static final String DEFAULT_ENDPOINT = new KeystoneApiMetadata().getDefaultEndpoint().orNull();
    
+   private final Set<Module> modules = ImmutableSet.<Module> of(new ExecutorServiceModule(newDirectExecutorService()));
+   
    protected MockWebServer server;
    protected KeystoneApi api;
    protected AuthenticationApi authenticationApi;
-   protected String authToken;
    private Json json;
    
    // So that we can ignore formatting.
@@ -68,11 +67,10 @@ public class BaseV3KeystoneApiMockTest {
    public void start() throws IOException {
       server = new MockWebServer();
       server.play();
-      
       ApiContext<KeystoneApi> ctx = ContextBuilder.newBuilder("openstack-keystone-3")
-              .credentials("project:identity", "credential")
+              .credentials("identity", "credential")
               .endpoint(url(""))
-              .modules(modules())
+              .modules(modules)
               .overrides(overrides())
               .build();
       json = ctx.utils().injector().getInstance(Json.class);
@@ -87,26 +85,11 @@ public class BaseV3KeystoneApiMockTest {
    }
    
    protected Properties overrides() {
-      Properties overrides = new Properties();
-      overrides.setProperty(KeystoneProperties.SCOPE, "project:1234567890");
-      overrides.setProperty(KeystoneProperties.SERVICE_TYPE, "identityv3");
-      return overrides;
-   }
-   
-   protected Set<Module> modules() {
-      ImmutableSet.Builder<Module> modules = ImmutableSet.builder();
-      modules.add(new ExecutorServiceModule(newDirectExecutorService()));
-      modules.add(new SLF4JLoggingModule());
-      return modules.build();
+      return new Properties();
    }
 
    protected String url(String path) {
       return server.getUrl(path).toString();
-   }
-   
-   protected void enqueueAuthentication(MockWebServer server) {
-      authToken = UUID.randomUUID().toString();
-      server.enqueue(jsonResponse("/v3/token.json").addHeader("X-Subject-Token", authToken));
    }
 
    protected MockResponse jsonResponse(String resource) {
@@ -142,10 +125,6 @@ public class BaseV3KeystoneApiMockTest {
    protected <T> T objectFromResource(String resourceName, Class<T> type) {
       String text = stringFromResource(resourceName);
       return json.fromJson(text, type);
-   }
-   
-   protected void assertAuthentication(MockWebServer server) throws InterruptedException {
-      assertSent(server, "POST", "/auth/tokens", stringFromResource("/v3/auth-password-scoped.json"));
    }
 
    protected RecordedRequest assertSent(MockWebServer server, String method, String path) throws InterruptedException {

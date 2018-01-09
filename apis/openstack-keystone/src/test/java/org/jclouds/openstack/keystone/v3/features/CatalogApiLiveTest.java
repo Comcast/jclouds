@@ -18,12 +18,21 @@ package org.jclouds.openstack.keystone.v3.features;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
+import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
+import org.jclouds.openstack.keystone.v2_0.domain.Tenant;
+import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.openstack.keystone.v3.domain.Endpoint;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiLiveTest;
 import org.testng.annotations.Test;
+
+import com.google.inject.Injector;
+import com.google.inject.Module;
 
 @Test(groups = "live", testName = "CatalogApiLiveTest")
 public class CatalogApiLiveTest extends BaseV3KeystoneApiLiveTest {
