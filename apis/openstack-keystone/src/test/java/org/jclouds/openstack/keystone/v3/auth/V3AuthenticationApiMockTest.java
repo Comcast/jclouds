@@ -17,7 +17,6 @@
 package org.jclouds.openstack.keystone.v3.auth;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
@@ -28,35 +27,73 @@ import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiMockTest;
 import org.testng.annotations.Test;
 
-import com.google.common.reflect.TypeToken;
-
-import java.util.Map;
-
-@Test(groups = "unit", testName = "TokenApiMockTest", singleThreaded = true)
+@Test(groups = "unit", testName = "V3AuthenticationApiMockTest", singleThreaded = true)
 public class V3AuthenticationApiMockTest extends BaseV3KeystoneApiMockTest {
 
    public void testAuthenticatePassword() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json"));
 
-      AuthInfo authInfo = authenticationApi.authenticatePassword(TenantAndCredentials.<PasswordCredentials>builder().credentials(PasswordCredentials.builder().username("user").password("pwd").build()).build());
+      TenantAndCredentials<PasswordCredentials> credentials = TenantAndCredentials.<PasswordCredentials> builder()
+            .tenantName("project")
+            .credentials(PasswordCredentials.builder().username("identity").password("credential").build()).build();
+      
+      AuthInfo authInfo = authenticationApi.authenticatePassword(credentials);
 
       assertTrue(authInfo instanceof Token);
       assertEquals(authInfo, tokenFromResource("/v3/token.json"));
 
       assertEquals(server.getRequestCount(), 1);
-      assertSent(server, "POST", "/auth/tokens");
+      assertSent(server, "POST", "/auth/tokens", stringFromResource("/v3/auth-password.json"));
+   }
+   
+   public void testAuthenticatePasswordScoped() throws InterruptedException {
+      server.enqueue(jsonResponse("/v3/token.json"));
+
+      TenantAndCredentials<PasswordCredentials> credentials = TenantAndCredentials.<PasswordCredentials> builder()
+            .tenantName("project")
+            .scope("project:1234567890")
+            .credentials(PasswordCredentials.builder().username("identity").password("credential").build()).build();
+      
+      AuthInfo authInfo = authenticationApi.authenticatePassword(credentials);
+
+      assertTrue(authInfo instanceof Token);
+      assertEquals(authInfo, tokenFromResource("/v3/token.json"));
+
+      assertEquals(server.getRequestCount(), 1);
+      assertSent(server, "POST", "/auth/tokens", stringFromResource("/v3/auth-password-scoped.json"));
    }
 
    public void testAuthenticateToken() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json"));
 
-      AuthInfo authInfo = authenticationApi.authenticateToken(TenantAndCredentials.<TokenCredentials>builder().credentials(TokenCredentials.builder().id("token").build()).build());
+      TenantAndCredentials<TokenCredentials> credentials = TenantAndCredentials.<TokenCredentials> builder()
+            .tenantName("project")
+            .credentials(TokenCredentials.builder().id("token").build()).build();
+      
+      AuthInfo authInfo = authenticationApi.authenticateToken(credentials);
 
       assertTrue(authInfo instanceof Token);
       assertEquals(authInfo, tokenFromResource("/v3/token.json"));
 
       assertEquals(server.getRequestCount(), 1);
-      assertSent(server, "POST", "/auth/tokens");
+      assertSent(server, "POST", "/auth/tokens", stringFromResource("/v3/auth-token.json"));
+   }
+   
+   public void testAuthenticateTokenScoped() throws InterruptedException {
+      server.enqueue(jsonResponse("/v3/token.json"));
+
+      TenantAndCredentials<TokenCredentials> credentials = TenantAndCredentials.<TokenCredentials> builder()
+            .tenantName("project")
+            .scope("domain:mydomain")
+            .credentials(TokenCredentials.builder().id("token").build()).build();
+      
+      AuthInfo authInfo = authenticationApi.authenticateToken(credentials);
+
+      assertTrue(authInfo instanceof Token);
+      assertEquals(authInfo, tokenFromResource("/v3/token.json"));
+
+      assertEquals(server.getRequestCount(), 1);
+      assertSent(server, "POST", "/auth/tokens", stringFromResource("/v3/auth-token-scoped.json"));
    }
 
 }

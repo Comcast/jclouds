@@ -18,52 +18,40 @@ package org.jclouds.openstack.keystone.v3.auth;
 
 import static org.testng.Assert.assertNotNull;
 
-import org.jclouds.openstack.keystone.auth.AuthenticationApi;
+import java.util.Properties;
+
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
-import org.jclouds.openstack.keystone.auth.filters.AuthenticateRequest;
-import org.jclouds.openstack.keystone.v3.KeystoneApi;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiLiveTest;
-import org.jclouds.rest.ApiContext;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 
 @Test(groups = "live", testName = "V3AuthenticationApiLiveTest")
 public class V3AuthenticationApiLiveTest extends BaseV3KeystoneApiLiveTest {
 
    private String tenant;
    private String user;
-   private ApiContext<KeystoneApi> context;
 
-   @BeforeClass
-   public void parseCredentials() {
+   @Override
+   protected Properties setupProperties() {
+      Properties properties = super.setupProperties();
       tenant = Iterables.get(Splitter.on(":").split(identity), 0);
       user = Iterables.get(Splitter.on(":").split(identity), 1);
-      context = newBuilder().modules(setupModules()).overrides(setupProperties())
-            .build(new TypeToken<ApiContext<KeystoneApi>>() {
-               private static final long serialVersionUID = 1L;
-            });
-
-      grabToken(context.utils().injector().getInstance(AuthenticateRequest.class));
+      return properties;
    }
 
    public void testAuthenticatePassword() {
-      assertNotNull(api().authenticatePassword(TenantAndCredentials.<PasswordCredentials> builder().tenantName(tenant)
-            .credentials(PasswordCredentials.builder().username(user).password(credential).build()).build()));
+      assertNotNull(authenticationApi.authenticatePassword(TenantAndCredentials.<PasswordCredentials> builder()
+            .tenantName(tenant).credentials(PasswordCredentials.builder().username(user).password(credential).build())
+            .build()));
    }
 
    public void testAuthenticateToken() {
-      assertNotNull(api().authenticateToken(TenantAndCredentials.<TokenCredentials> builder().tenantName(tenant)
-            .credentials(TokenCredentials.builder().id(token).build()).build()));
-   }
-
-   protected AuthenticationApi api() {
-      return context.utils().injector().getInstance(AuthenticationApi.class);
+      assertNotNull(authenticationApi.authenticateToken(TenantAndCredentials.<TokenCredentials> builder()
+            .tenantName(tenant).credentials(TokenCredentials.builder().id(token.get()).build()).build()));
    }
 
 }
