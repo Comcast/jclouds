@@ -24,7 +24,7 @@ import javax.inject.Singleton;
 import org.jclouds.openstack.keystone.auth.AuthenticationApi;
 import org.jclouds.openstack.keystone.auth.config.CredentialType;
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
 
 @CredentialType(PASSWORD_CREDENTIALS)
@@ -44,7 +44,7 @@ public class AuthenticatePasswordCredentials extends BaseAuthenticator<PasswordC
    }
 
    @Override
-   public AuthInfo authenticate(TenantAndCredentials<PasswordCredentials> credentials) {
+   public AuthInfo authenticate(TenantOrDomainAndCredentials<PasswordCredentials> credentials) {
       return auth.authenticatePassword(credentials);
    }
 }

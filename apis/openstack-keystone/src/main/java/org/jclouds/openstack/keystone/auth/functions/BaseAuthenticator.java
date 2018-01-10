@@ -28,7 +28,7 @@ import javax.annotation.Resource;
 import org.jclouds.domain.Credentials;
 import org.jclouds.logging.Logger;
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 
 import com.google.common.base.Function;
 import com.google.inject.Inject;
@@ -80,14 +80,14 @@ public abstract class BaseAuthenticator<C> implements Function<Credentials, Auth
       }
       
       C creds = createCredentials(usernameOrAccessKey, passwordOrSecretKeyOrToken);
-      TenantAndCredentials<C> credsWithTenant = TenantAndCredentials.<C> builder().tenantId(defaultTenantId)
-            .tenantName(tenantName).scope(scope).credentials(creds).build();
+      TenantOrDomainAndCredentials<C> credsWithTenant = TenantOrDomainAndCredentials.<C> builder().tenantOrDomainId(defaultTenantId)
+            .tenantOrDomainName(tenantName).scope(scope).credentials(creds).build();
       
       return authenticate(credsWithTenant);
    }
 
    public abstract C createCredentials(String identity, String credential);
    
-   public abstract AuthInfo authenticate(TenantAndCredentials<C> credentials);
+   public abstract AuthInfo authenticate(TenantOrDomainAndCredentials<C> credentials);
 
 }

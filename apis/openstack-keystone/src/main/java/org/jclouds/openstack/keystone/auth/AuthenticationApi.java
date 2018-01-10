@@ -18,7 +18,7 @@ package org.jclouds.openstack.keystone.auth;
 
 import org.jclouds.openstack.keystone.auth.domain.ApiAccessKeyCredentials;
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 
@@ -27,9 +27,9 @@ import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
  */
 public interface AuthenticationApi {
 
-   AuthInfo authenticatePassword(TenantAndCredentials<PasswordCredentials> credentials);
+   AuthInfo authenticatePassword(TenantOrDomainAndCredentials<PasswordCredentials> credentials);
 
-   AuthInfo authenticateAccessKey(TenantAndCredentials<ApiAccessKeyCredentials> credentials);
+   AuthInfo authenticateAccessKey(TenantOrDomainAndCredentials<ApiAccessKeyCredentials> credentials);
 
-   AuthInfo authenticateToken(TenantAndCredentials<TokenCredentials> credentials);
+   AuthInfo authenticateToken(TenantOrDomainAndCredentials<TokenCredentials> credentials);
 }

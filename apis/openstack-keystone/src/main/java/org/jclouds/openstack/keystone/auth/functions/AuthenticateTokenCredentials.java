@@ -24,7 +24,7 @@ import javax.inject.Singleton;
 import org.jclouds.openstack.keystone.auth.AuthenticationApi;
 import org.jclouds.openstack.keystone.auth.config.CredentialType;
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 
 @CredentialType(TOKEN_CREDENTIALS)
@@ -44,7 +44,7 @@ public class AuthenticateTokenCredentials extends BaseAuthenticator<TokenCredent
    }
 
    @Override
-   public AuthInfo authenticate(TenantAndCredentials<TokenCredentials> credentials) {
+   public AuthInfo authenticate(TenantOrDomainAndCredentials<TokenCredentials> credentials) {
       return auth.authenticateToken(credentials);
    }
 }

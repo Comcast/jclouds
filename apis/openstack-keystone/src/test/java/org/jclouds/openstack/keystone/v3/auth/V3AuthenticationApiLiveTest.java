@@ -21,7 +21,7 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Properties;
 
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiLiveTest;
 import org.testng.annotations.Test;
@@ -44,14 +44,14 @@ public class V3AuthenticationApiLiveTest extends BaseV3KeystoneApiLiveTest {
    }
 
    public void testAuthenticatePassword() {
-      assertNotNull(authenticationApi.authenticatePassword(TenantAndCredentials.<PasswordCredentials> builder()
-            .tenantName(tenant).credentials(PasswordCredentials.builder().username(user).password(credential).build())
-            .build()));
+      assertNotNull(authenticationApi.authenticatePassword(TenantOrDomainAndCredentials.<PasswordCredentials> builder()
+            .tenantOrDomainName(tenant)
+            .credentials(PasswordCredentials.builder().username(user).password(credential).build()).build()));
    }
 
    public void testAuthenticateToken() {
-      assertNotNull(authenticationApi.authenticateToken(TenantAndCredentials.<TokenCredentials> builder()
-            .tenantName(tenant).credentials(TokenCredentials.builder().id(token.get()).build()).build()));
+      assertNotNull(authenticationApi.authenticateToken(TenantOrDomainAndCredentials.<TokenCredentials> builder()
+            .tenantOrDomainName(tenant).credentials(TokenCredentials.builder().id(token.get()).build()).build()));
    }
 
 }

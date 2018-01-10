@@ -26,7 +26,7 @@ import javax.ws.rs.core.MediaType;
 import org.jclouds.openstack.keystone.auth.AuthenticationApi;
 import org.jclouds.openstack.keystone.auth.domain.ApiAccessKeyCredentials;
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.v2_0.binders.BindAuthToJsonPayload;
 import org.jclouds.openstack.keystone.v2_0.domain.Access;
 import org.jclouds.rest.annotations.MapBinder;
@@ -51,7 +51,7 @@ public interface V2AuthenticationApi extends AuthenticationApi, Closeable {
    @SelectJson("access")
    @MapBinder(BindAuthToJsonPayload.class)
    @Override
-   Access authenticatePassword(TenantAndCredentials<PasswordCredentials> credentials);
+   Access authenticatePassword(TenantOrDomainAndCredentials<PasswordCredentials> credentials);
 
    /**
     * Authenticate to generate a token.
@@ -63,6 +63,6 @@ public interface V2AuthenticationApi extends AuthenticationApi, Closeable {
    @SelectJson("access")
    @MapBinder(BindAuthToJsonPayload.class)
    @Override
-   Access authenticateAccessKey(TenantAndCredentials<ApiAccessKeyCredentials> credentials);
+   Access authenticateAccessKey(TenantOrDomainAndCredentials<ApiAccessKeyCredentials> credentials);
 
 }

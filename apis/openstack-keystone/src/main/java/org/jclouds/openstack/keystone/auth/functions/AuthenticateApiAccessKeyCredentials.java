@@ -25,7 +25,7 @@ import org.jclouds.openstack.keystone.auth.AuthenticationApi;
 import org.jclouds.openstack.keystone.auth.config.CredentialType;
 import org.jclouds.openstack.keystone.auth.domain.ApiAccessKeyCredentials;
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 
 @CredentialType(API_ACCESS_KEY_CREDENTIALS)
 @Singleton
@@ -44,7 +44,7 @@ public class AuthenticateApiAccessKeyCredentials extends BaseAuthenticator<ApiAc
    }
 
    @Override
-   public AuthInfo authenticate(TenantAndCredentials<ApiAccessKeyCredentials> credentials) {
+   public AuthInfo authenticate(TenantOrDomainAndCredentials<ApiAccessKeyCredentials> credentials) {
       return auth.authenticateAccessKey(credentials);
    }
 

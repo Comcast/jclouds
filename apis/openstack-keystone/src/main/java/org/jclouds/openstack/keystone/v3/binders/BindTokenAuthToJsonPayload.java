@@ -22,12 +22,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jclouds.json.Json;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 import org.jclouds.openstack.keystone.v3.domain.Auth;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Id;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Identity;
-import org.jclouds.openstack.keystone.v3.domain.Auth.Scope;
 
 @Singleton
 public class BindTokenAuthToJsonPayload extends BindAuthToJsonPayload<TokenCredentials> {
@@ -38,7 +37,7 @@ public class BindTokenAuthToJsonPayload extends BindAuthToJsonPayload<TokenCrede
    }
 
    @Override
-   protected Auth buildAuth(TenantAndCredentials<TokenCredentials> credentials, Scope scope) {
+   protected Auth buildAuth(TenantOrDomainAndCredentials<TokenCredentials> credentials, Object scope) {
       Id token = Id.create(credentials.credentials().id());
       return Auth.create(Identity.create(singletonList("token"), token, null), scope);
    }

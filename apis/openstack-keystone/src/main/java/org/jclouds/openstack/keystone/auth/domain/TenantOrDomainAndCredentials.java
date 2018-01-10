@@ -25,28 +25,28 @@ import com.google.auto.value.AutoValue;
  * configured context credentials.
  */
 @AutoValue
-public abstract class TenantAndCredentials<T> {
+public abstract class TenantOrDomainAndCredentials<T> {
 
-   @Nullable public abstract String tenantId();
-   @Nullable public abstract String tenantName();
+   @Nullable public abstract String tenantOrDomainId();
+   @Nullable public abstract String tenantOrDomainName();
    @Nullable public abstract String scope();
    public abstract T credentials();
 
-   TenantAndCredentials() {
+   TenantOrDomainAndCredentials() {
 
    }
 
    public static <T> Builder<T> builder() {
-      return new AutoValue_TenantAndCredentials.Builder<T>();
+      return new AutoValue_TenantOrDomainAndCredentials.Builder<T>();
    }
 
    @AutoValue.Builder
    public abstract static class Builder<T> {
-      public abstract Builder<T> tenantId(String tenantId);
-      public abstract Builder<T> tenantName(String tenantName);
+      public abstract Builder<T> tenantOrDomainId(String tenantId);
+      public abstract Builder<T> tenantOrDomainName(String tenantName);
       public abstract Builder<T> scope(String scope);
       public abstract Builder<T> credentials(T credentials);
 
-      public abstract TenantAndCredentials<T> build();
+      public abstract TenantOrDomainAndCredentials<T> build();
    }
 }

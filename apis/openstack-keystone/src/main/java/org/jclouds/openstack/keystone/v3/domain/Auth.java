@@ -26,10 +26,10 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Auth {
    public abstract Identity identity();
-   @Nullable public abstract Scope scope();
+   @Nullable public abstract Object scope();
 
    @SerializedNames({ "identity", "scope" })
-   public static Auth create(Identity identity, Scope scope) {
+   public static Auth create(Identity identity, Object scope) {
       return new AutoValue_Auth(identity, scope);
    }
    
@@ -97,26 +97,27 @@ public abstract class Auth {
       }
    }
    
-   public abstract static class Scope {
+   public static class Scope {
       public static final String PROJECT = "project";
       public static final String DOMAIN = "domain";
+      public static final String UNSCOPED = "unscoped";
    }
 
    @AutoValue
-   public abstract static class ProjectScope extends Scope {
+   public abstract static class ProjectScope {
       public abstract Id project();
 
-      @SerializedNames({ PROJECT })
+      @SerializedNames({ Scope.PROJECT })
       public static ProjectScope create(Id id) {
          return new AutoValue_Auth_ProjectScope(id);
       }
    }
    
    @AutoValue
-   public abstract static class DomainScope extends Scope {
+   public abstract static class DomainScope {
       public abstract Domain domain();
 
-      @SerializedNames({ DOMAIN })
+      @SerializedNames({ Scope.DOMAIN })
       public static DomainScope create(Domain domain) {
          return new AutoValue_Auth_DomainScope(domain);
       }

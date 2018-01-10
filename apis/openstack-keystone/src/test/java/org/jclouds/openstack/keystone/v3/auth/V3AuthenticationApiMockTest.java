@@ -21,7 +21,7 @@ import static org.testng.Assert.assertTrue;
 
 import org.jclouds.openstack.keystone.auth.domain.AuthInfo;
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 import org.jclouds.openstack.keystone.v3.domain.Token;
 import org.jclouds.openstack.keystone.v3.internal.BaseV3KeystoneApiMockTest;
@@ -33,8 +33,8 @@ public class V3AuthenticationApiMockTest extends BaseV3KeystoneApiMockTest {
    public void testAuthenticatePassword() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json"));
 
-      TenantAndCredentials<PasswordCredentials> credentials = TenantAndCredentials.<PasswordCredentials> builder()
-            .tenantName("project")
+      TenantOrDomainAndCredentials<PasswordCredentials> credentials = TenantOrDomainAndCredentials.<PasswordCredentials> builder()
+            .tenantOrDomainName("project")
             .credentials(PasswordCredentials.builder().username("identity").password("credential").build()).build();
       
       AuthInfo authInfo = authenticationApi.authenticatePassword(credentials);
@@ -49,8 +49,8 @@ public class V3AuthenticationApiMockTest extends BaseV3KeystoneApiMockTest {
    public void testAuthenticatePasswordScoped() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json"));
 
-      TenantAndCredentials<PasswordCredentials> credentials = TenantAndCredentials.<PasswordCredentials> builder()
-            .tenantName("project")
+      TenantOrDomainAndCredentials<PasswordCredentials> credentials = TenantOrDomainAndCredentials.<PasswordCredentials> builder()
+            .tenantOrDomainName("project")
             .scope("project:1234567890")
             .credentials(PasswordCredentials.builder().username("identity").password("credential").build()).build();
       
@@ -66,8 +66,8 @@ public class V3AuthenticationApiMockTest extends BaseV3KeystoneApiMockTest {
    public void testAuthenticateToken() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json"));
 
-      TenantAndCredentials<TokenCredentials> credentials = TenantAndCredentials.<TokenCredentials> builder()
-            .tenantName("project")
+      TenantOrDomainAndCredentials<TokenCredentials> credentials = TenantOrDomainAndCredentials.<TokenCredentials> builder()
+            .tenantOrDomainName("project")
             .credentials(TokenCredentials.builder().id("token").build()).build();
       
       AuthInfo authInfo = authenticationApi.authenticateToken(credentials);
@@ -82,8 +82,8 @@ public class V3AuthenticationApiMockTest extends BaseV3KeystoneApiMockTest {
    public void testAuthenticateTokenScoped() throws InterruptedException {
       server.enqueue(jsonResponse("/v3/token.json"));
 
-      TenantAndCredentials<TokenCredentials> credentials = TenantAndCredentials.<TokenCredentials> builder()
-            .tenantName("project")
+      TenantOrDomainAndCredentials<TokenCredentials> credentials = TenantOrDomainAndCredentials.<TokenCredentials> builder()
+            .tenantOrDomainName("project")
             .scope("domain:mydomain")
             .credentials(TokenCredentials.builder().id("token").build()).build();
       

@@ -30,7 +30,7 @@ import javax.inject.Singleton;
 import org.jclouds.http.HttpRequest;
 import org.jclouds.json.Json;
 import org.jclouds.openstack.keystone.auth.config.CredentialType;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.rest.MapBinder;
 import org.jclouds.rest.binders.BindToJsonPayload;
 import org.jclouds.rest.internal.GeneratedHttpRequest;
@@ -47,9 +47,9 @@ public class BindAuthToJsonPayload extends BindToJsonPayload implements MapBinde
       super(jsonBinder);
    }
 
-   protected TenantAndCredentials<?> findCredentialsInArgs(GeneratedHttpRequest gRequest) {
-      Optional<Object> credentials = tryFind(gRequest.getInvocation().getArgs(), instanceOf(TenantAndCredentials.class));
-      return credentials.isPresent() ? (TenantAndCredentials<?>) credentials.get() : null;
+   protected TenantOrDomainAndCredentials<?> findCredentialsInArgs(GeneratedHttpRequest gRequest) {
+      Optional<Object> credentials = tryFind(gRequest.getInvocation().getArgs(), instanceOf(TenantOrDomainAndCredentials.class));
+      return credentials.isPresent() ? (TenantOrDomainAndCredentials<?>) credentials.get() : null;
    }
 
    @Override
@@ -59,7 +59,7 @@ public class BindAuthToJsonPayload extends BindToJsonPayload implements MapBinde
       GeneratedHttpRequest gRequest = (GeneratedHttpRequest) request;
       Builder<String, Object> builder = ImmutableMap.builder();
 
-      TenantAndCredentials<?> credentials = findCredentialsInArgs(gRequest);
+      TenantOrDomainAndCredentials<?> credentials = findCredentialsInArgs(gRequest);
       if (credentials != null) {
          CredentialType credentialType = findCredentialType(credentials.credentials().getClass());
          checkArgument(credentialType != null, "the given credentials must be annotated with @CredentialType");
@@ -69,10 +69,10 @@ public class BindAuthToJsonPayload extends BindToJsonPayload implements MapBinde
          // TODO: is tenantName permanent? or should we switch to tenantId at
          // some point. seems most tools still use tenantName
          if (credentials != null) {
-            if (!Strings.isNullOrEmpty(credentials.tenantId()))
-               builder.put("tenantId", credentials.tenantId());
-            else if (!Strings.isNullOrEmpty(credentials.tenantName()))
-               builder.put("tenantName", credentials.tenantName());
+            if (!Strings.isNullOrEmpty(credentials.tenantOrDomainId()))
+               builder.put("tenantId", credentials.tenantOrDomainId());
+            else if (!Strings.isNullOrEmpty(credentials.tenantOrDomainName()))
+               builder.put("tenantName", credentials.tenantOrDomainName());
          }
       }
 

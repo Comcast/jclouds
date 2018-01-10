@@ -26,9 +26,8 @@ import static org.jclouds.openstack.keystone.v3.domain.Auth.Scope.PROJECT;
 import java.util.Map;
 
 import org.jclouds.http.HttpRequest;
-import org.jclouds.javax.annotation.Nullable;
 import org.jclouds.json.Json;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.v3.domain.Auth;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Domain;
 import org.jclouds.openstack.keystone.v3.domain.Auth.DomainScope;
@@ -48,7 +47,7 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
       super(jsonBinder);
    }
 
-   protected abstract Auth buildAuth(TenantAndCredentials<T> credentials, Scope scope);
+   protected abstract Auth buildAuth(TenantOrDomainAndCredentials<T> credentials, Object scope);
 
    @Override
    public <R extends HttpRequest> R bindToRequest(R request, Map<String, Object> postParams) {
@@ -57,12 +56,12 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
       GeneratedHttpRequest gRequest = (GeneratedHttpRequest) request;
 
       Optional<Object> authentication = tryFind(gRequest.getInvocation().getArgs(),
-            instanceOf(TenantAndCredentials.class));
+            instanceOf(TenantOrDomainAndCredentials.class));
       checkArgument(authentication.isPresent(), "no credentials found in the api call arguments");
 
       @SuppressWarnings("unchecked")
-      TenantAndCredentials<T> credentials = (TenantAndCredentials<T>) authentication.get();
-      Scope scope = parseScope(credentials.scope());
+      TenantOrDomainAndCredentials<T> credentials = (TenantOrDomainAndCredentials<T>) authentication.get();
+      Object scope = parseScope(credentials);
       Auth auth = buildAuth(credentials, scope);
 
       R authRequest = super.bindToRequest(request, ImmutableMap.of("auth", auth));
@@ -71,10 +70,21 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
       return authRequest;
    }
    
-   private Scope parseScope(@Nullable String input) {
-      if (input == null) return null;
-      String[] parts = input.split(":");
-      checkArgument(parts.length == 2, "Invalid scope: %s", input);
+   private Object parseScope(TenantOrDomainAndCredentials<T> credentials) {
+      // If no scope has been explicitly configured, use a domain-scoped
+      // authentication, as we have everything we need.
+      String scope = credentials.scope();
+      if (scope == null) {
+         return DomainScope.create(Domain.create(credentials.tenantOrDomainName()));
+      }
+      // If there is no prefix, assume an unscoped authentication
+      if (!scope.contains(":")) {
+         checkArgument(scope.equals(Scope.UNSCOPED), "Invalid scope: %s", scope);
+         return Scope.UNSCOPED;
+      }
+      // Otherwise, parse if it is a project or domain scope
+      String[] parts = scope.split(":");
+      checkArgument(parts.length == 2, "Invalid scope: %s", scope);
       checkArgument(PROJECT.equals(parts[0]) || DOMAIN.equals(parts[0]), "Scope prefix should be '%s' or '%s'",
             PROJECT, DOMAIN);
       return PROJECT.equals(parts[0]) ? ProjectScope.create(Id.create(parts[1])) : DomainScope.create(Domain

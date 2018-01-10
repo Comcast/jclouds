@@ -67,7 +67,7 @@ public class KeystoneApiMetadata extends BaseHttpApiMetadata<KeystoneApi> {
       protected Builder() {
           id("openstack-keystone-3")
          .name("OpenStack Keystone 3.x API")
-         .identityName("${projectName}:${userName} or ${userName}, if your keystone supports a default project")
+         .identityName("${domain}:${userName} or ${userName}, if your keystone supports a default project")
          .credentialName("${password}")
          .endpointName("Keystone V3 base URL")
          .documentation(URI.create("http://api.openstack.org/"))

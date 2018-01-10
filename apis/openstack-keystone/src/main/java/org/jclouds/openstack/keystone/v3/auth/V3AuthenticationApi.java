@@ -25,7 +25,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jclouds.openstack.keystone.auth.AuthenticationApi;
 import org.jclouds.openstack.keystone.auth.domain.PasswordCredentials;
-import org.jclouds.openstack.keystone.auth.domain.TenantAndCredentials;
+import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.auth.domain.TokenCredentials;
 import org.jclouds.openstack.keystone.v3.binders.BindPasswordAuthToJsonPayload;
 import org.jclouds.openstack.keystone.v3.binders.BindTokenAuthToJsonPayload;
@@ -48,13 +48,13 @@ public interface V3AuthenticationApi extends AuthenticationApi, Closeable {
    @ResponseParser(ParseTokenFromHttpResponse.class)
    @MapBinder(BindPasswordAuthToJsonPayload.class)
    @Override
-   Token authenticatePassword(TenantAndCredentials<PasswordCredentials> credentials);
+   Token authenticatePassword(TenantOrDomainAndCredentials<PasswordCredentials> credentials);
 
    @Named("token:create")
    @POST
    @ResponseParser(ParseTokenFromHttpResponse.class)
    @MapBinder(BindTokenAuthToJsonPayload.class)
    @Override
-   Token authenticateToken(TenantAndCredentials<TokenCredentials> credentials);
+   Token authenticateToken(TenantOrDomainAndCredentials<TokenCredentials> credentials);
 
 }
