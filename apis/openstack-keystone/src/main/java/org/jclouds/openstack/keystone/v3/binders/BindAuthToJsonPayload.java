@@ -73,12 +73,7 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
    }
    
    private Object parseScope(TenantOrDomainAndCredentials<T> credentials) {
-      // If no scope has been explicitly configured, use a domain-scoped
-      // authentication, as we have everything we need.
       String scope = credentials.scope();
-      if (scope == null) {
-         return DomainScope.create(Domain.create(credentials.tenantOrDomainName()));
-      }
       // If there is no prefix, assume an unscoped authentication
       if (!scope.contains(":")) {
          checkArgument(scope.equals(Scope.UNSCOPED), "Invalid scope: %s", scope);
