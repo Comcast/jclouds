@@ -633,4 +633,83 @@ public class InstanceType {
     * </ul>
     */
    public static final String R3_8XLARGE = "r3.8xlarge";
+
+   /**
+    * R4 instances are optimized for memory-intensive applications and offer better price per GiB of RAM than R3.
+    * DDR4 Memory
+    * <ul>
+    * <li>15.25 GB memory</li>
+    * <li>2 vCPU</li>
+    * <li>EBS storage only</li>
+    * <li>64-bit platform</li>
+    * <li>Network Performance: Up to 10 Gigabit</li>
+    * </ul>
+    */   
+   public static final String R4_LARGE = "r4.large";
+
+   /**
+    * R4 instances are optimized for memory-intensive applications and offer better price per GiB of RAM than R3.
+    * DDR4 Memory
+    * <ul>
+    * <li>30.5 GB memory</li>
+    * <li>4 vCPU</li>
+    * <li>EBS storage only</li>
+    * <li>64-bit platform</li>
+    * <li>Network Performance: Up to 10 Gigabit</li>
+    * </ul>
+    */   
+   public static final String R4_XLARGE = "r4.xlarge";
+
+
+   /**
+    * R4 instances are optimized for memory-intensive applications and offer better price per GiB of RAM than R3.
+    * DDR4 Memory
+    * <ul>
+    * <li>61 GB memory</li>
+    * <li>8 vCPU</li>
+    * <li>EBS storage only</li>
+    * <li>64-bit platform</li>
+    * <li>Network Performance: Up to 10 Gigabit</li>
+    * </ul>
+    */   
+   public static final String R4_2XLARGE = "r4.2xlarge";
+
+   /**
+    * R4 instances are optimized for memory-intensive applications and offer better price per GiB of RAM than R3.
+    * DDR4 Memory
+    * <ul>
+    * <li>122 GB memory</li>
+    * <li>16 vCPU</li>
+    * <li>EBS storage only</li>
+    * <li>64-bit platform</li>
+    * <li>Network Performance: Up to 10 Gigabit</li>
+    * </ul>
+    */   
+   public static final String R4_4XLARGE = "r4.4xlarge";
+
+   /**
+    * R4 instances are optimized for memory-intensive applications and offer better price per GiB of RAM than R3.
+    * DDR4 Memory
+    * <ul>
+    * <li>244 GB memory</li>
+    * <li>32 vCPU</li>
+    * <li>EBS storage only</li>
+    * <li>64-bit platform</li>
+    * <li>Network Performance: 10 Gigabit</li>
+    * </ul>
+    */   
+   public static final String R4_8XLARGE = "r4.8xlarge";
+
+   /**
+    * R4 instances are optimized for memory-intensive applications and offer better price per GiB of RAM than R3.
+    * DDR4 Memory
+    * <ul>
+    * <li>488 GB memory</li>
+    * <li>64 vCPU</li>
+    * <li>EBS storage only</li>
+    * <li>64-bit platform</li>
+    * <li>Network Performance: 25 Gigabit</li>
+    * </ul>
+    */   
+   public static final String R4_16XLARGE = "r4.16xlarge";
 }
