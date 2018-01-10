@@ -100,6 +100,7 @@ public abstract class Auth {
    public static class Scope {
       public static final String PROJECT = "project";
       public static final String DOMAIN = "domain";
+      public static final String DOMAIN_ID = "domain";
       public static final String UNSCOPED = "unscoped";
    }
 
@@ -110,6 +111,16 @@ public abstract class Auth {
       @SerializedNames({ Scope.PROJECT })
       public static ProjectScope create(Id id) {
          return new AutoValue_Auth_ProjectScope(id);
+      }
+   }
+   
+   @AutoValue
+   public abstract static class DomainIdScope {
+      public abstract Id domain();
+
+      @SerializedNames({ Scope.PROJECT })
+      public static DomainIdScope create(Id id) {
+         return new AutoValue_Auth_DomainIdScope(id);
       }
    }
    

@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.instanceOf;
 import static com.google.common.collect.Iterables.tryFind;
 import static org.jclouds.openstack.keystone.v3.domain.Auth.Scope.DOMAIN;
+import static org.jclouds.openstack.keystone.v3.domain.Auth.Scope.DOMAIN_ID;
 import static org.jclouds.openstack.keystone.v3.domain.Auth.Scope.PROJECT;
 
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.jclouds.json.Json;
 import org.jclouds.openstack.keystone.auth.domain.TenantOrDomainAndCredentials;
 import org.jclouds.openstack.keystone.v3.domain.Auth;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Domain;
+import org.jclouds.openstack.keystone.v3.domain.Auth.DomainIdScope;
 import org.jclouds.openstack.keystone.v3.domain.Auth.DomainScope;
 import org.jclouds.openstack.keystone.v3.domain.Auth.Id;
 import org.jclouds.openstack.keystone.v3.domain.Auth.ProjectScope;
@@ -85,10 +87,15 @@ public abstract class BindAuthToJsonPayload<T> extends BindToJsonPayload impleme
       // Otherwise, parse if it is a project or domain scope
       String[] parts = scope.split(":");
       checkArgument(parts.length == 2, "Invalid scope: %s", scope);
-      checkArgument(PROJECT.equals(parts[0]) || DOMAIN.equals(parts[0]), "Scope prefix should be '%s' or '%s'",
-            PROJECT, DOMAIN);
-      return PROJECT.equals(parts[0]) ? ProjectScope.create(Id.create(parts[1])) : DomainScope.create(Domain
-            .create(parts[1]));
+      checkArgument(PROJECT.equals(parts[0]) || DOMAIN.equals(parts[0]) || DOMAIN_ID.equals(parts[0]),
+            "Scope prefix should be '%s', '%s' or '%s'", PROJECT, DOMAIN, DOMAIN_ID);
+      if (PROJECT.equals(parts[0])) {
+         return ProjectScope.create(Id.create(parts[1]));
+      } else if (DOMAIN.equals(parts[0])) {
+         return DomainScope.create(Domain.create(parts[1]));
+      } else {
+         return DomainIdScope.create(Id.create(parts[1]));
+      }
    }
 
 }
