@@ -746,7 +746,7 @@ public class EC2HardwareBuilder extends HardwareBuilder {
    }
 
    /**
-    * @see InstanceType#C4_XLARGE
+    * @see InstanceType#C5_XLARGE
     */
    public static EC2HardwareBuilder c5_xlarge() {
       return new EC2HardwareBuilder(InstanceType.C4_XLARGE).c5()
@@ -756,7 +756,7 @@ public class EC2HardwareBuilder extends HardwareBuilder {
    }
 
    /**
-    * @see InstanceType#C4_2XLARGE
+    * @see InstanceType#C5_2XLARGE
     */
    public static EC2HardwareBuilder c5_2xlarge() {
       return new EC2HardwareBuilder(InstanceType.C4_2XLARGE).c5()
@@ -766,7 +766,7 @@ public class EC2HardwareBuilder extends HardwareBuilder {
    }
 
    /**
-    * @see InstanceType#C4_4XLARGE
+    * @see InstanceType#C5_4XLARGE
     */
    public static EC2HardwareBuilder c5_4xlarge() {
       return new EC2HardwareBuilder(InstanceType.C4_4XLARGE).c5()
@@ -776,20 +776,20 @@ public class EC2HardwareBuilder extends HardwareBuilder {
    }
 
    /**
-    * @see InstanceType#C4_9XLARGE
+    * @see InstanceType#C5_9XLARGE
     */
    public static EC2HardwareBuilder c5_9xlarge() {
-      return new EC2HardwareBuilder(InstanceType.C4_9XLARGE).c5()
+      return new EC2HardwareBuilder(InstanceType.C5_9XLARGE).c5()
          .ram(73728)
          .processors(ImmutableList.of(new Processor(36.0, 3.0)))
          .rootDeviceType(RootDeviceType.EBS);
    }
 
    /**
-    * @see InstanceType#C4_18XLARGE
+    * @see InstanceType#C5_18XLARGE
     */
    public static EC2HardwareBuilder c5_18xlarge() {
-      return new EC2HardwareBuilder(InstanceType.C4_18XLARGE).c5()
+      return new EC2HardwareBuilder(InstanceType.C5_18XLARGE).c5()
          .ram(147456)
          .processors(ImmutableList.of(new Processor(72.0, 3.0)))
          .rootDeviceType(RootDeviceType.EBS);
