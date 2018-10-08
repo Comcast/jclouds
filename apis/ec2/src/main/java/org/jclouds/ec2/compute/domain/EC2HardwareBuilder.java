@@ -234,7 +234,7 @@ public class EC2HardwareBuilder extends HardwareBuilder {
 
       return this;
    }
-   
+
    private EC2HardwareBuilder m3() {
       virtualizationTypes(VirtualizationType.HVM, VirtualizationType.PARAVIRTUAL);
       return this;

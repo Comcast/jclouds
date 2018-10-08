@@ -96,6 +96,10 @@ import static org.jclouds.ec2.compute.domain.EC2HardwareBuilder.t3_medium;
 import static org.jclouds.ec2.compute.domain.EC2HardwareBuilder.t3_large;
 import static org.jclouds.ec2.compute.domain.EC2HardwareBuilder.t3_xlarge;
 import static org.jclouds.ec2.compute.domain.EC2HardwareBuilder.t3_2xlarge;
+import static org.jclouds.ec2.compute.domain.EC2HardwareBuilder.x1_16xlarge;
+import static org.jclouds.ec2.compute.domain.EC2HardwareBuilder.x1_32xlarge;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
