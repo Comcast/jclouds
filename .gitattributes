@@ -1,4 +1,4 @@
-* text eol=auto
+* text=auto
 
 *.cmd binary
 *.xml text
